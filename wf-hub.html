@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WF HUB | Wasteland Forsaken</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --void: #020005;
+  --obsidian: #0a0010;
+  --deep: #0d0018;
+  --purple-core: #4B0082;
+  --purple-glow: #6a00b8;
+  --purple-neon: #9b30ff;
+  --purple-bright: #bf5fff;
+  --ember: #ff4500;
+  --steel: #1a1a2e;
+  --text-primary: #e8ddf5;
+  --text-dim: #7a6d8a;
+  --glass-bg: rgba(15,0,25,0.7);
+  --glass-border: rgba(155,48,255,0.2);
+  --online: #00ff88;
+  --offline: #ff3355;
+}
+
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--void);
+  color:var(--text-primary);
+  font-family:'Rajdhani',sans-serif;
+  overflow-x:hidden;
+  cursor:none;
+  min-height:100vh;
+}
+
+/* ── CURSOR ─────────────────────────────────────────────── */
+#cur{position:fixed;width:8px;height:8px;background:var(--purple-neon);border-radius:50%;pointer-events:none;z-index:9999;box-shadow:0 0 10px var(--purple-neon),0 0 20px var(--purple-core);transition:transform .1s;}
+#curR{position:fixed;width:28px;height:28px;border:1px solid rgba(155,48,255,.5);border-radius:50%;pointer-events:none;z-index:9998;transition:all .08s linear;}
+
+/* ── NOISE OVERLAY ───────────────────────────────────────── */
+body::before{
+  content:'';position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  opacity:.025;pointer-events:none;z-index:0;
+}
+
+/* ── NAV ─────────────────────────────────────────────────── */
+nav{
+  position:fixed;top:0;left:0;right:0;
+  height:64px;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 48px;
+  background:rgba(2,0,5,.85);
+  border-bottom:1px solid rgba(75,0,130,.25);
+  backdrop-filter:blur(20px);
+  z-index:100;
+}
+.nav-logo{
+  display:flex;align-items:center;gap:12px;
+  text-decoration:none;
+  font-family:'Bebas Neue',sans-serif;
+  font-size:24px;letter-spacing:6px;
+  color:var(--purple-bright);
+  text-shadow:0 0 20px var(--purple-neon);
+}
+.nav-logo span{
+  font-family:'Share Tech Mono',monospace;
+  font-size:9px;letter-spacing:3px;
+  color:var(--text-dim);
+  border-left:1px solid rgba(75,0,130,.4);
+  padding-left:12px;
+}
+.nav-tabs{display:flex;gap:4px;}
+.nav-tab{
+  font-family:'Share Tech Mono',monospace;
+  font-size:9px;letter-spacing:3px;text-transform:uppercase;
+  padding:8px 20px;
+  background:transparent;
+  border:1px solid transparent;
+  color:var(--text-dim);
+  cursor:none;
+  transition:all .25s;
+  clip-path:polygon(6px 0%,100% 0%,calc(100% - 6px) 100%,0% 100%);
+}
+.nav-tab:hover{color:var(--purple-bright);border-color:rgba(155,48,255,.3);background:rgba(75,0,130,.1);}
+.nav-tab.active{background:linear-gradient(135deg,var(--purple-core),var(--purple-glow));border-color:var(--purple-neon);color:#fff;box-shadow:0 0 16px rgba(75,0,130,.5);}
+.nav-back{
+  font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:3px;
+  color:var(--text-dim);text-decoration:none;
+  display:flex;align-items:center;gap:8px;
+  transition:color .3s;
+}
+.nav-back:hover{color:var(--purple-bright);}
+.nav-back::before{content:'◂';font-size:10px;}
+
+/* ── PAGE ────────────────────────────────────────────────── */
+.page{display:none;padding:100px 60px 80px;max-width:1400px;margin:0 auto;position:relative;z-index:1;}
+.page.active{display:block;animation:pageIn .4s ease;}
+@keyframes pageIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── SECTION HEADER ──────────────────────────────────────── */
+.sec-header{margin-bottom:60px;}
+.sec-eyebrow{
+  display:flex;align-items:center;gap:16px;
+  font-family:'Share Tech Mono',monospace;
+  font-size:9px;letter-spacing:4px;
+  color:var(--purple-neon);text-transform:uppercase;
+  margin-bottom:12px;
+}
+.sec-eyebrow::before{content:'';width:24px;height:1px;background:var(--purple-neon);}
+.sec-title{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(48px,6vw,80px);
+  line-height:.95;
+  letter-spacing:3px;
+  color:var(--text-primary);
+}
+.sec-title span{
+  -webkit-text-stroke:1px var(--purple-neon);
+  color:transparent;
+  text-shadow:0 0 40px rgba(155,48,255,.3);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PAGE 1 — ACHIEVEMENTS
+═══════════════════════════════════════════════════════════ */
+.ach-hero{
+  position:relative;
+  width:100%;height:220px;
+  margin-bottom:64px;
+  border:1px solid var(--glass-border);
+  overflow:hidden;
+  display:flex;align-items:center;
+  background:linear-gradient(135deg,rgba(75,0,130,.2),rgba(10,0,16,.9));
+}
+.ach-hero::before{
+  content:'';position:absolute;inset:0;
+  background:
+    repeating-linear-gradient(0deg,transparent,transparent 39px,rgba(75,0,130,.08) 40px),
+    repeating-linear-gradient(90deg,transparent,transparent 39px,rgba(75,0,130,.08) 40px);
+}
+.ach-hero-content{padding:0 60px;position:relative;z-index:1;}
+.ach-hero-tag{
+  font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:4px;
+  color:var(--purple-neon);margin-bottom:12px;
+}
+.ach-hero-title{
+  font-family:'Bebas Neue',sans-serif;font-size:52px;letter-spacing:4px;
+  background:linear-gradient(90deg,var(--text-primary),var(--purple-bright));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.ach-hero-sub{font-size:14px;font-weight:300;color:var(--text-dim);margin-top:8px;letter-spacing:1px;}
+.ach-hero-orb{
+  position:absolute;right:-60px;top:50%;transform:translateY(-50%);
+  width:320px;height:320px;
+  background:radial-gradient(circle,rgba(155,48,255,.25) 0%,transparent 70%);
+  border-radius:50%;
+}
+
+/* ACHIEVEMENT GRID */
+.ach-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:20px;
+  margin-bottom:60px;
+}
+.ach-card{
+  position:relative;
+  background:var(--glass-bg);
+  border:1px solid var(--glass-border);
+  padding:36px 32px;
+  overflow:hidden;
+  transition:transform .3s,border-color .3s,box-shadow .3s;
+  clip-path:polygon(0 0,calc(100% - 20px) 0,100% 20px,100% 100%,20px 100%,0 calc(100% - 20px));
+}
+.ach-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--purple-neon),transparent);
+  opacity:0;transition:opacity .3s;
+}
+.ach-card::after{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(circle at 50% 0%,rgba(155,48,255,.08),transparent 60%);
+  opacity:0;transition:opacity .3s;
+}
+.ach-card:hover{transform:translateY(-6px);border-color:rgba(155,48,255,.5);box-shadow:0 20px 60px rgba(75,0,130,.3);}
+.ach-card:hover::before,.ach-card:hover::after{opacity:1;}
+.ach-card.gold{border-color:rgba(255,180,0,.2);}
+.ach-card.gold::before{background:linear-gradient(90deg,transparent,#ffb400,transparent);}
+.ach-card.gold:hover{border-color:rgba(255,180,0,.6);box-shadow:0 20px 60px rgba(255,180,0,.2);}
+.ach-icon{
+  font-size:40px;margin-bottom:20px;display:block;
+  filter:drop-shadow(0 0 12px rgba(155,48,255,.6));
+  transition:transform .3s;
+}
+.ach-card.gold .ach-icon{filter:drop-shadow(0 0 12px rgba(255,180,0,.8));}
+.ach-card:hover .ach-icon{transform:scale(1.15) rotate(-3deg);}
+.ach-stat{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:42px;letter-spacing:2px;
+  color:var(--purple-bright);
+  line-height:1;
+  margin-bottom:6px;
+}
+.ach-card.gold .ach-stat{color:#ffb400;text-shadow:0 0 20px rgba(255,180,0,.5);}
+.ach-name{
+  font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:3px;
+  color:var(--text-primary);text-transform:uppercase;margin-bottom:8px;
+}
+.ach-desc{font-size:13px;font-weight:300;color:var(--text-dim);line-height:1.7;}
+.ach-corner{
+  position:absolute;bottom:12px;right:14px;
+  font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:2px;
+  color:rgba(155,48,255,.3);
+}
+
+/* TIMELINE */
+.timeline-wrap{margin-top:20px;}
+.timeline-label{
+  font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:4px;
+  color:var(--purple-neon);margin-bottom:28px;
+  display:flex;align-items:center;gap:12px;
+}
+.timeline-label::before{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--purple-core),transparent);}
+.timeline{display:flex;flex-direction:column;gap:0;}
+.tl-item{
+  display:grid;grid-template-columns:80px 1px 1fr;
+  gap:0 28px;align-items:start;
+}
+.tl-date{
+  font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;
+  color:var(--text-dim);padding-top:4px;text-align:right;
+}
+.tl-line-wrap{display:flex;flex-direction:column;align-items:center;gap:0;}
+.tl-dot{
+  width:10px;height:10px;border-radius:50%;
+  background:var(--purple-neon);
+  box-shadow:0 0 12px var(--purple-neon);
+  flex-shrink:0;margin-top:2px;
+}
+.tl-spine{width:1px;flex:1;min-height:40px;background:linear-gradient(180deg,rgba(155,48,255,.4),rgba(75,0,130,.1));}
+.tl-item:last-child .tl-spine{display:none;}
+.tl-content{padding-bottom:32px;}
+.tl-title{
+  font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;
+  color:var(--text-primary);margin-bottom:4px;
+}
+.tl-sub{font-size:12px;font-weight:300;color:var(--text-dim);letter-spacing:1px;}
+
+/* ═══════════════════════════════════════════════════════════
+   PAGE 2 — SERVERS
+═══════════════════════════════════════════════════════════ */
+.srv-filter{
+  display:flex;gap:8px;margin-bottom:40px;flex-wrap:wrap;
+}
+.srv-filter-btn{
+  font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:3px;
+  padding:8px 20px;border:1px solid rgba(75,0,130,.3);
+  background:transparent;color:var(--text-dim);cursor:none;
+  transition:all .25s;
+  clip-path:polygon(8px 0%,100% 0%,calc(100% - 8px) 100%,0% 100%);
+}
+.srv-filter-btn:hover{color:var(--purple-bright);border-color:var(--purple-neon);}
+.srv-filter-btn.active{background:rgba(75,0,130,.3);color:#fff;border-color:var(--purple-neon);box-shadow:0 0 12px rgba(75,0,130,.3);}
+
+.srv-list{display:flex;flex-direction:column;gap:12px;}
+.srv-card{
+  display:grid;
+  grid-template-columns:20px 1fr auto auto auto auto;
+  align-items:center;gap:24px;
+  padding:24px 32px;
+  background:var(--glass-bg);
+  border:1px solid var(--glass-border);
+  position:relative;overflow:hidden;
+  transition:border-color .3s,transform .3s,box-shadow .3s;
+}
+.srv-card::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:3px;
+  background:linear-gradient(180deg,var(--purple-neon),var(--purple-core));
+  opacity:0;transition:opacity .3s;
+}
+.srv-card:hover{border-color:rgba(155,48,255,.4);transform:translateX(4px);box-shadow:0 4px 40px rgba(75,0,130,.2);}
+.srv-card:hover::before{opacity:1;}
+.srv-card.offline{opacity:.55;}
+
+.srv-status-dot{
+  width:10px;height:10px;border-radius:50%;flex-shrink:0;
+}
+.srv-status-dot.online{
+  background:var(--online);
+  box-shadow:0 0 10px var(--online),0 0 20px rgba(0,255,136,.3);
+  animation:pulse-online 2s infinite;
+}
+.srv-status-dot.offline{background:var(--offline);}
+@keyframes pulse-online{
+  0%,100%{box-shadow:0 0 6px var(--online),0 0 12px rgba(0,255,136,.3);}
+  50%{box-shadow:0 0 14px var(--online),0 0 30px rgba(0,255,136,.5);}
+}
+
+.srv-info{}
+.srv-name{
+  font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;
+  color:var(--text-primary);margin-bottom:2px;
+}
+.srv-tags{display:flex;gap:6px;flex-wrap:wrap;}
+.srv-tag{
+  font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:2px;
+  padding:2px 8px;
+  border:1px solid rgba(75,0,130,.3);
+  color:var(--text-dim);
+  background:rgba(75,0,130,.08);
+}
+.srv-tag.wipe{border-color:rgba(255,180,0,.3);color:#ffb400;background:rgba(255,180,0,.06);}
+.srv-tag.modded{border-color:rgba(0,200,255,.3);color:#00c8ff;background:rgba(0,200,255,.06);}
+
+.srv-players{
+  text-align:center;
+  font-family:'Share Tech Mono',monospace;
+}
+.srv-players-num{font-size:20px;color:var(--purple-bright);}
+.srv-players-max{font-size:10px;color:var(--text-dim);letter-spacing:1px;}
+
+.srv-bar-wrap{width:80px;}
+.srv-bar-label{font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--text-dim);letter-spacing:2px;margin-bottom:6px;}
+.srv-bar{height:4px;background:rgba(75,0,130,.2);position:relative;overflow:hidden;}
+.srv-bar-fill{height:100%;background:linear-gradient(90deg,var(--purple-core),var(--purple-neon));transition:width .5s;}
+
+.srv-ping{text-align:center;}
+.srv-ping-num{
+  font-family:'Share Tech Mono',monospace;font-size:16px;
+}
+.srv-ping-num.good{color:#00ff88;}
+.srv-ping-num.mid{color:#ffb400;}
+.srv-ping-num.bad{color:#ff3355;}
+.srv-ping-label{font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--text-dim);letter-spacing:2px;}
+
+.srv-connect{
+  font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:3px;
+  padding:10px 20px;
+  background:linear-gradient(135deg,var(--purple-core),var(--purple-glow));
+  border:1px solid var(--purple-neon);
+  color:#fff;cursor:none;
+  transition:all .3s;
+  clip-path:polygon(8px 0%,100% 0%,calc(100% - 8px) 100%,0% 100%);
+  white-space:nowrap;
+}
+.srv-connect:hover{box-shadow:0 0 24px rgba(75,0,130,.7);transform:scale(1.04);}
+.srv-connect:disabled{background:rgba(75,0,130,.1);border-color:rgba(75,0,130,.2);color:var(--text-dim);box-shadow:none;transform:none;}
+
+.srv-map-preview{
+  width:56px;height:40px;
+  background:rgba(75,0,130,.1);
+  border:1px solid rgba(75,0,130,.2);
+  overflow:hidden;position:relative;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;color:rgba(75,0,130,.5);
+}
+.srv-map-preview svg{opacity:.3;}
+
+/* SERVER STATS BAR */
+.srv-stats{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  gap:1px;background:rgba(75,0,130,.15);
+  border:1px solid var(--glass-border);
+  margin-bottom:40px;
+  overflow:hidden;
+}
+.srv-stat-item{
+  background:var(--glass-bg);
+  padding:24px 32px;
+  text-align:center;
+}
+.srv-stat-num{
+  font-family:'Bebas Neue',sans-serif;font-size:36px;letter-spacing:2px;
+  color:var(--purple-bright);line-height:1;
+}
+.srv-stat-lbl{
+  font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:3px;
+  color:var(--text-dim);margin-top:4px;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PAGE 3 — VIDEO GALLERY
+═══════════════════════════════════════════════════════════ */
+.vid-featured{
+  position:relative;width:100%;
+  aspect-ratio:16/7;
+  margin-bottom:40px;
+  overflow:hidden;
+  border:1px solid var(--glass-border);
+  cursor:none;
+}
+.vid-featured-thumb{
+  width:100%;height:100%;object-fit:cover;
+  background:linear-gradient(135deg,#0d0018,#1a0030);
+  display:flex;align-items:center;justify-content:center;
+}
+.vid-featured-bg{
+  position:absolute;inset:0;
+  background:
+    linear-gradient(135deg,rgba(75,0,130,.4) 0%,rgba(0,0,0,.7) 60%),
+    radial-gradient(circle at 70% 50%,rgba(155,48,255,.2),transparent 60%);
+}
+.vid-featured-grid{
+  position:absolute;inset:0;
+  background:
+    repeating-linear-gradient(0deg,transparent,transparent 59px,rgba(75,0,130,.06) 60px),
+    repeating-linear-gradient(90deg,transparent,transparent 59px,rgba(75,0,130,.06) 60px);
+}
+.vid-featured-play{
+  position:absolute;
+  width:80px;height:80px;
+  border:2px solid var(--purple-neon);
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(75,0,130,.4);
+  backdrop-filter:blur(8px);
+  box-shadow:0 0 40px rgba(155,48,255,.5),inset 0 0 20px rgba(155,48,255,.1);
+  transition:all .3s;
+  left:50%;top:50%;transform:translate(-50%,-50%);
+}
+.vid-featured:hover .vid-featured-play{
+  transform:translate(-50%,-50%) scale(1.1);
+  box-shadow:0 0 60px rgba(155,48,255,.8),inset 0 0 30px rgba(155,48,255,.2);
+}
+.vid-featured-play svg{margin-left:4px;}
+.vid-featured-info{
+  position:absolute;bottom:0;left:0;right:0;
+  padding:32px 40px;
+  background:linear-gradient(0deg,rgba(2,0,5,.9) 0%,transparent 100%);
+}
+.vid-featured-badge{
+  font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:4px;
+  color:var(--purple-neon);margin-bottom:8px;
+  display:inline-flex;align-items:center;gap:8px;
+}
+.vid-featured-badge::before{content:'';width:20px;height:1px;background:var(--purple-neon);}
+.vid-featured-title{
+  font-family:'Bebas Neue',sans-serif;font-size:clamp(28px,4vw,48px);
+  letter-spacing:3px;color:var(--text-primary);margin-bottom:8px;
+}
+.vid-featured-meta{
+  font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;
+  color:var(--text-dim);display:flex;gap:20px;
+}
+
+/* VIDEO GRID */
+.vid-cats{display:flex;gap:8px;margin-bottom:28px;flex-wrap:wrap;}
+.vid-cat{
+  font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:3px;
+  padding:6px 16px;border:1px solid rgba(75,0,130,.25);
+  background:transparent;color:var(--text-dim);cursor:none;transition:all .25s;
+}
+.vid-cat.active{background:rgba(75,0,130,.25);color:var(--purple-bright);border-color:var(--purple-neon);}
+.vid-cat:hover{color:var(--purple-bright);border-color:rgba(155,48,255,.4);}
+
+.vid-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:16px;
+}
+.vid-card{
+  position:relative;overflow:hidden;
+  border:1px solid var(--glass-border);
+  cursor:none;
+  transition:border-color .3s,box-shadow .3s;
+  background:rgba(10,0,16,.8);
+}
+.vid-card:hover{border-color:rgba(155,48,255,.5);box-shadow:0 8px 40px rgba(75,0,130,.3);}
+.vid-thumb{
+  aspect-ratio:16/9;
+  display:flex;align-items:center;justify-content:center;
+  position:relative;overflow:hidden;
+}
+.vid-thumb-bg{
+  position:absolute;inset:0;
+  transition:transform .4s;
+}
+.vid-card:hover .vid-thumb-bg{transform:scale(1.06);}
+.vid-overlay{
+  position:absolute;inset:0;
+  background:rgba(2,0,5,.4);
+  transition:background .3s;
+}
+.vid-card:hover .vid-overlay{background:rgba(2,0,5,.2);}
+.vid-play-btn{
+  position:absolute;
+  width:48px;height:48px;
+  border:1.5px solid rgba(155,48,255,.8);
+  border-radius:50%;
+  background:rgba(75,0,130,.5);
+  backdrop-filter:blur(4px);
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 0 20px rgba(155,48,255,.4);
+  transition:all .3s;
+}
+.vid-card:hover .vid-play-btn{transform:scale(1.12);box-shadow:0 0 40px rgba(155,48,255,.8);}
+.vid-duration{
+  position:absolute;bottom:8px;right:10px;
+  font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:1px;
+  background:rgba(2,0,5,.8);
+  padding:2px 6px;color:var(--text-primary);
+}
+.vid-views{
+  position:absolute;top:8px;left:10px;
+  font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:1px;
+  background:rgba(75,0,130,.6);
+  padding:2px 8px;color:var(--purple-bright);
+  border:1px solid rgba(155,48,255,.3);
+}
+.vid-meta{padding:16px 18px;}
+.vid-title{
+  font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px;
+  color:var(--text-primary);margin-bottom:6px;line-height:1.2;
+}
+.vid-info{
+  display:flex;justify-content:space-between;align-items:center;
+}
+.vid-type{
+  font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:2px;
+  color:var(--purple-neon);
+}
+.vid-date{font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--text-dim);}
+
+/* CHANNEL BANNER */
+.yt-banner{
+  margin-top:48px;padding:32px 40px;
+  background:linear-gradient(135deg,rgba(255,0,0,.06),rgba(75,0,130,.15));
+  border:1px solid rgba(255,0,0,.15);
+  display:flex;align-items:center;justify-content:space-between;
+  gap:24px;
+}
+.yt-banner-left{display:flex;align-items:center;gap:20px;}
+.yt-icon{
+  width:52px;height:52px;
+  background:rgba(255,0,0,.15);
+  border:1px solid rgba(255,0,0,.3);
+  border-radius:12px;
+  display:flex;align-items:center;justify-content:center;
+}
+.yt-banner-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;color:#ff4040;}
+.yt-banner-sub{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--text-dim);}
+.yt-sub-btn{
+  font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:3px;
+  padding:12px 28px;
+  background:rgba(255,0,0,.2);border:1px solid rgba(255,0,0,.4);
+  color:#ff6060;cursor:none;transition:all .3s;
+  clip-path:polygon(10px 0%,100% 0%,calc(100% - 10px) 100%,0% 100%);
+}
+.yt-sub-btn:hover{background:rgba(255,0,0,.35);box-shadow:0 0 24px rgba(255,0,0,.3);}
+
+/* ── REVEAL ──────────────────────────────────────────────── */
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .6s,transform .6s;}
+.reveal.visible{opacity:1;transform:none;}
+
+/* ── FOOTER ──────────────────────────────────────────────── */
+footer{
+  border-top:1px solid rgba(75,0,130,.15);
+  padding:32px 60px;
+  display:flex;align-items:center;justify-content:space-between;
+  position:relative;z-index:1;
+}
+.footer-logo{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:6px;color:rgba(155,48,255,.3);}
+.footer-text{font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:3px;color:var(--text-dim);}
+
+/* ── AMBIENT ORBS ─────────────────────────────────────────── */
+.orb{
+  position:fixed;border-radius:50%;
+  pointer-events:none;z-index:0;
+  filter:blur(80px);opacity:.12;
+  animation:orbFloat 12s ease-in-out infinite;
+}
+.orb1{width:500px;height:500px;background:var(--purple-core);top:-100px;left:-100px;}
+.orb2{width:400px;height:400px;background:var(--purple-glow);bottom:-80px;right:-80px;animation-delay:-6s;}
+@keyframes orbFloat{0%,100%{transform:translate(0,0)}50%{transform:translate(30px,-20px)}}
+
+/* ── RESPONSIVE ──────────────────────────────────────────── */
+@media(max-width:1024px){
+  .ach-grid{grid-template-columns:repeat(2,1fr);}
+  .vid-grid{grid-template-columns:repeat(2,1fr);}
+  .srv-card{grid-template-columns:20px 1fr auto auto;}
+  .srv-bar-wrap,.srv-ping{display:none;}
+}
+@media(max-width:768px){
+  nav{padding:0 20px;}
+  .page{padding:90px 20px 60px;}
+  .ach-grid{grid-template-columns:1fr;}
+  .vid-grid{grid-template-columns:1fr;}
+  .srv-stats{grid-template-columns:repeat(2,1fr);}
+  .yt-banner{flex-direction:column;align-items:flex-start;}
+}
+</style>
+</head>
+<body>
+
+<div id="cur"></div>
+<div id="curR"></div>
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">
+    WF <span>Wasteland Forsaken Hub</span>
+  </div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showPage('achievements',this)">Achievements</button>
+    <button class="nav-tab" onclick="showPage('servers',this)">Servers</button>
+    <button class="nav-tab" onclick="showPage('videos',this)">Videos</button>
+  </div>
+  <div style="display:flex;align-items:center;gap:12px;" id="nav-auth">
+    <!-- заполняется JS -->
+  </div>
+</nav>
+
+<!-- ══════════════════════════════════════════════════════
+     PAGE: ACHIEVEMENTS
+══════════════════════════════════════════════════════ -->
+<div class="page active" id="page-achievements">
+
+  <div class="ach-hero reveal">
+    <div class="ach-hero-content">
+      <div class="ach-hero-tag">// CLAN ACHIEVEMENTS DATABASE — SEASON 2024-2025</div>
+      <div class="ach-hero-title">HALL OF DOMINANCE</div>
+      <div class="ach-hero-sub">4 года побед · 247 активных участников · Без поражений</div>
+    </div>
+    <div class="ach-hero-orb"></div>
+  </div>
+
+  <div class="sec-header reveal">
+    <div class="sec-eyebrow">Combat Records</div>
+    <div class="sec-title">Наши<br><span>Достижения</span></div>
+  </div>
+
+  <div class="ach-grid" id="ach-grid">
+    <!-- Заполняется через /api/achievements/ -->
+  </div>
+
+  <div class="timeline-wrap reveal">
+    <div class="timeline-label">ИСТОРИЯ ПОБЕД</div>
+    <div class="timeline">
+      <div class="tl-item">
+        <div class="tl-date">ЯНВ 2025</div>
+        <div class="tl-line-wrap"><div class="tl-dot"></div><div class="tl-spine"></div></div>
+        <div class="tl-content"><div class="tl-title">Facepunch EU — Чемпионат вайпа</div><div class="tl-sub">Первое место · Полный контроль карты · 89 уничтоженных кланов</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">НОЯ 2024</div>
+        <div class="tl-line-wrap"><div class="tl-dot"></div><div class="tl-spine"></div></div>
+        <div class="tl-content"><div class="tl-title">Мегарейд клана "TITAN"</div><div class="tl-sub">Рейд онлайн базы 40+ человек · 18 минут · Полный лут</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">АВГ 2024</div>
+        <div class="tl-line-wrap"><div class="tl-dot"></div><div class="tl-spine"></div></div>
+        <div class="tl-content"><div class="tl-title">RU Clan Awards — 1 место</div><div class="tl-sub">Лучший клан года · Лучший рейд года · Лучший билдер года</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">МАЙ 2024</div>
+        <div class="tl-line-wrap"><div class="tl-dot"></div><div class="tl-spine"></div></div>
+        <div class="tl-content"><div class="tl-title">Рекорд скорости рейда</div><div class="tl-sub">2:47 — официальный рекорд RU серверов · Без потерь</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">МАР 2024</div>
+        <div class="tl-line-wrap"><div class="tl-dot"></div><div class="tl-spine"></div></div>
+        <div class="tl-content"><div class="tl-title">Основание клана WF</div><div class="tl-sub">12 основателей · Первый вайп · Полная зачистка сервера</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     PAGE: SERVERS
+══════════════════════════════════════════════════════ -->
+<div class="page" id="page-servers">
+
+  <div class="sec-header reveal">
+    <div class="sec-eyebrow">Infrastructure</div>
+    <div class="sec-title">Наши<br><span>Серверы</span></div>
+  </div>
+
+  <div class="srv-stats reveal">
+    <div class="srv-stat-item">
+      <div class="srv-stat-num" id="cnt-online">3</div>
+      <div class="srv-stat-lbl">Серверов онлайн</div>
+    </div>
+    <div class="srv-stat-item">
+      <div class="srv-stat-num" id="cnt-players">284</div>
+      <div class="srv-stat-lbl">Игроков онлайн</div>
+    </div>
+    <div class="srv-stat-item">
+      <div class="srv-stat-num">24/7</div>
+      <div class="srv-stat-lbl">Аптайм</div>
+    </div>
+    <div class="srv-stat-item">
+      <div class="srv-stat-num">EU</div>
+      <div class="srv-stat-lbl">Локация</div>
+    </div>
+  </div>
+
+  <div class="srv-filter reveal">
+    <button class="srv-filter-btn active" onclick="filterSrv('all',this)">ALL</button>
+    <button class="srv-filter-btn" onclick="filterSrv('vanilla',this)">VANILLA</button>
+    <button class="srv-filter-btn" onclick="filterSrv('modded',this)">MODDED</button>
+    <button class="srv-filter-btn" onclick="filterSrv('training',this)">TRAINING</button>
+  </div>
+
+  <div class="srv-list reveal" id="srv-list">
+    <!-- Заполняется через /api/servers/ -->
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     PAGE: VIDEO GALLERY
+══════════════════════════════════════════════════════ -->
+<div class="page" id="page-videos">
+
+  <div class="sec-header reveal">
+    <div class="sec-eyebrow">Media Library</div>
+    <div class="sec-title">Клановые<br><span>Видео</span></div>
+  </div>
+
+  <!-- FEATURED -->
+  <div class="vid-featured reveal">
+    <div class="vid-featured-bg"></div>
+    <div class="vid-featured-grid"></div>
+    <!-- SVG Rust cinematic BG placeholder -->
+    <svg style="position:absolute;inset:0;width:100%;height:100%;opacity:.07" viewBox="0 0 1200 500" preserveAspectRatio="xMidYMid slice">
+      <rect width="1200" height="500" fill="#1a0030"/>
+      <polygon points="600,0 800,500 400,500" fill="rgba(155,48,255,.3)"/>
+      <circle cx="900" cy="200" r="200" fill="rgba(75,0,130,.2)"/>
+      <rect x="0" y="350" width="1200" height="150" fill="rgba(0,0,0,.5)"/>
+      <line x1="0" y1="350" x2="1200" y2="350" stroke="rgba(155,48,255,.3)" stroke-width="1"/>
+    </svg>
+    <div class="vid-featured-play">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+    </div>
+    <div class="vid-featured-info">
+      <div class="vid-featured-badge">FEATURED RAID</div>
+      <div class="vid-featured-title">WF vs TITAN — MEGA ONLINE RAID 40v40</div>
+      <div class="vid-featured-meta">
+        <span>1.2M просмотров</span>
+        <span>47:23</span>
+        <span>18 января 2025</span>
+        <span>youtube.com/wf_clan</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="vid-cats reveal">
+    <button class="vid-cat active" onclick="filterVid('all',this)">ALL</button>
+    <button class="vid-cat" onclick="filterVid('raid',this)">RAIDS</button>
+    <button class="vid-cat" onclick="filterVid('pvp',this)">PVP</button>
+    <button class="vid-cat" onclick="filterVid('build',this)">BUILDS</button>
+    <button class="vid-cat" onclick="filterVid('guide',this)">GUIDES</button>
+  </div>
+
+  <div class="vid-grid" id="vid-grid">
+    <!-- Заполняется через /api/videos/ -->
+  </div>
+
+  <div class="yt-banner reveal">
+    <div class="yt-banner-left">
+      <div class="yt-icon">
+        <svg width="28" height="20" viewBox="0 0 28 20" fill="#ff4040"><path d="M27.4 3.1a3.5 3.5 0 0 0-2.5-2.5C22.8 0 14 0 14 0S5.2 0 3.1.6A3.5 3.5 0 0 0 .6 3.1C0 5.2 0 10 0 10s0 4.8.6 6.9a3.5 3.5 0 0 0 2.5 2.5C5.2 20 14 20 14 20s8.8 0 10.9-.6a3.5 3.5 0 0 0 2.5-2.5C28 14.8 28 10 28 10s0-4.8-.6-6.9zM11.2 14.3V5.7L18.5 10l-7.3 4.3z"/></svg>
+      </div>
+      <div>
+        <div class="yt-banner-title">WF CLAN — YOUTUBE</div>
+        <div class="yt-banner-sub">4.2K ПОДПИСЧИКОВ · НОВЫЕ ВИДЕО КАЖДУЮ НЕДЕЛЮ</div>
+      </div>
+    </div>
+    <button class="yt-sub-btn">ПОДПИСАТЬСЯ ▸</button>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">WF</div>
+  <div class="footer-text">© 2025 WASTELAND FORSAKEN · ALL RIGHTS RESERVED</div>
+  <div class="footer-text">HUB v2.0</div>
+</footer>
+
+<script>
+// ── CURSOR ─────────────────────────────────────────────
+const cur = document.getElementById('cur');
+const curR = document.getElementById('curR');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cur.style.left=(mx-4)+'px';cur.style.top=(my-4)+'px';});
+(function loop(){rx+=(mx-rx)*.12;ry+=(my-ry)*.12;curR.style.left=(rx-14)+'px';curR.style.top=(ry-14)+'px';requestAnimationFrame(loop);})();
+document.querySelectorAll('button,a').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{cur.style.transform='scale(2)';curR.style.transform='scale(1.5)';curR.style.borderColor='rgba(155,48,255,.9)';});
+  el.addEventListener('mouseleave',()=>{cur.style.transform='scale(1)';curR.style.transform='scale(1)';curR.style.borderColor='rgba(155,48,255,.5)';});
+});
+
+// ── AUTH ────────────────────────────────────────────────
+const wfToken    = localStorage.getItem('wf_token');
+const wfUsername = localStorage.getItem('wf_username');
+
+function renderNavAuth(){
+  const nav = document.getElementById('nav-auth');
+  if(wfToken && wfUsername){
+    nav.innerHTML = `
+      <span style="font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;
+        color:var(--purple-bright);border:1px solid rgba(155,48,255,.35);padding:8px 16px;">
+        ▶ ${wfUsername.toUpperCase()}
+      </span>
+      <button onclick="logout()" style="font-family:'Share Tech Mono',monospace;font-size:9px;
+        letter-spacing:2px;color:var(--text-dim);background:none;border:1px solid rgba(155,48,255,.15);
+        padding:8px 14px;cursor:none;transition:color .2s;"
+        onmouseenter="this.style.color='#ff3355'" onmouseleave="this.style.color='var(--text-dim)'">
+        ВЫЙТИ
+      </button>
+      <a href="/" class="nav-back">Main Site</a>`;
+  } else {
+    nav.innerHTML = `
+      <a href="/auth/" class="nav-back" style="border:1px solid rgba(155,48,255,.2);padding:8px 18px;">ВОЙТИ</a>
+      <a href="/" class="nav-back">Main Site</a>`;
+  }
+}
+
+function logout(){
+  localStorage.removeItem('wf_token');
+  localStorage.removeItem('wf_username');
+  window.location.reload();
+}
+
+// ── PAGE SWITCHING ─────────────────────────────────────
+function showPage(id, btn){
+  if(id === 'videos' && !wfToken){
+    window.location.href = '/auth/';
+    return;
+  }
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  btn.classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+  setTimeout(triggerReveal,100);
+}
+
+// ── SERVER FILTER ──────────────────────────────────────
+function filterSrv(type, btn){
+  document.querySelectorAll('.srv-filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.srv-card').forEach(card=>{
+    card.style.display = (type==='all'||card.dataset.type===type)?'grid':'none';
+  });
+}
+
+// ── VIDEO FILTER ───────────────────────────────────────
+function filterVid(cat, btn){
+  document.querySelectorAll('.vid-cat').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.vid-card').forEach(card=>{
+    card.style.display = (cat==='all'||card.dataset.cat===cat)?'block':'none';
+  });
+}
+
+// ── REVEAL ON SCROLL ───────────────────────────────────
+function triggerReveal(){
+  document.querySelectorAll('.reveal').forEach(el=>{
+    const r=el.getBoundingClientRect();
+    if(r.top<window.innerHeight-60) el.classList.add('visible');
+  });
+}
+window.addEventListener('scroll',triggerReveal);
+triggerReveal();
+
+// ── ANIMATED COUNTERS ──────────────────────────────────
+function animCount(el, target, suffix=''){
+  let cur=0;
+  const step=Math.max(1,Math.ceil(target/60));
+  const t=setInterval(()=>{
+    cur=Math.min(cur+step,target);
+    el.textContent=cur+suffix;
+    if(cur>=target)clearInterval(t);
+  },16);
+}
+
+// ── API BASE URL ────────────────────────────────────────
+const API = '';   // пустая строка = тот же хост (Django-сервер)
+
+// ── ЗАГРУЗКА ДОСТИЖЕНИЙ ─────────────────────────────────
+async function loadAchievements(){
+  const grid = document.getElementById('ach-grid');
+  try {
+    const res  = await fetch(API + '/api/achievements/');
+    const list = await res.json();
+    grid.innerHTML = list.map((a, i) => `
+      <div class="ach-card ${a.tier==='gold'?'gold':''} reveal" style="transition-delay:${(i*0.05+.05).toFixed(2)}s">
+        <span class="ach-icon">${a.icon}</span>
+        <div class="ach-stat">${a.stat}</div>
+        <div class="ach-name">${a.name}</div>
+        <div class="ach-desc">${a.description}</div>
+        <div class="ach-corner">#${String(a.id).padStart(3,'0')}</div>
+      </div>`).join('');
+    triggerReveal();
+  } catch(e){ grid.innerHTML = '<p style="color:var(--text-dim);padding:1rem">Ошибка загрузки данных</p>'; }
+}
+
+// ── ЗАГРУЗКА СЕРВЕРОВ ───────────────────────────────────
+async function loadServers(){
+  const list = document.getElementById('srv-list');
+  try {
+    const res     = await fetch(API + '/api/servers/');
+    const servers = await res.json();
+
+    // Обновляем счётчики наверху
+    const totalOnline  = servers.filter(s=>s.status==='online').length;
+    const totalPlayers = servers.reduce((s,srv)=>s+srv.players,0);
+    const elOnline  = document.getElementById('cnt-online');
+    const elPlayers = document.getElementById('cnt-players');
+    if(elOnline)  animCount(elOnline,  totalOnline);
+    if(elPlayers) animCount(elPlayers, totalPlayers);
+
+    list.innerHTML = servers.map(s => {
+      const pct     = s.max_players ? Math.round(s.players/s.max_players*100) : 0;
+      const offline = s.status==='offline';
+      const pingCls = !s.ping ? 'bad' : s.ping<30 ? 'good' : s.ping<60 ? 'mid' : 'bad';
+      const tagCls  = s.type==='modded' ? 'modded' : s.type==='training' ? 'modded' : '';
+      return `
+      <div class="srv-card${offline?' offline':''}" data-type="${s.type}">
+        <div class="srv-status-dot ${s.status}"></div>
+        <div class="srv-info">
+          <div class="srv-name">${s.name}</div>
+          <div class="srv-tags">
+            <span class="srv-tag ${tagCls}">${s.type.toUpperCase()}</span>
+            <span class="srv-tag wipe">WIPE: ${s.wipe_day}</span>
+            <span class="srv-tag">${s.region}</span>
+          </div>
+        </div>
+        <div class="srv-players">
+          <div class="srv-players-num" ${offline?'style="color:var(--text-dim)"':''}>${offline?'—':s.players}</div>
+          <div class="srv-players-max">/ ${s.max_players}</div>
+        </div>
+        <div class="srv-bar-wrap">
+          <div class="srv-bar-label">CAPACITY</div>
+          <div class="srv-bar"><div class="srv-bar-fill" style="width:${pct}%"></div></div>
+        </div>
+        <div class="srv-ping">
+          <div class="srv-ping-num ${offline?'bad':pingCls}">${s.ping?s.ping+'ms':'—'}</div>
+          <div class="srv-ping-label">PING</div>
+        </div>
+        <button class="srv-connect" ${offline?'disabled':''}>${offline?'OFFLINE':'CONNECT ▸'}</button>
+      </div>`;
+    }).join('');
+    triggerReveal();
+  } catch(e){ list.innerHTML = '<p style="color:var(--text-dim);padding:1rem">Ошибка загрузки серверов</p>'; }
+}
+
+// ── ЗАГРУЗКА ВИДЕО ──────────────────────────────────────
+const VID_COLORS = {
+  raid:  'linear-gradient(135deg,#1a0030 0%,#300060 50%,#0a0018 100%)',
+  pvp:   'linear-gradient(135deg,#200010 0%,#500020 50%,#100008 100%)',
+  build: 'linear-gradient(135deg,#001020 0%,#003060 50%,#000818 100%)',
+  guide: 'linear-gradient(135deg,#0a1000 0%,#204000 50%,#050800 100%)',
+};
+
+async function loadVideos(){
+  const grid = document.getElementById('vid-grid');
+  try {
+    const res   = await fetch(API + '/api/videos/');
+    const vids  = await res.json();
+    grid.innerHTML = vids.map((v, i) => `
+      <div class="vid-card reveal" data-cat="${v.category}" style="transition-delay:${(i*0.05+.05).toFixed(2)}s">
+        <div class="vid-thumb">
+          <div class="vid-thumb-bg" style="background:${VID_COLORS[v.category]||VID_COLORS.raid};width:100%;height:100%;position:absolute;"></div>
+          <div class="vid-overlay"></div>
+          <div class="vid-play-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="rgba(155,48,255,1)"><path d="M8 5v14l11-7z"/></svg>
+          </div>
+          <div class="vid-duration">${v.duration}</div>
+          <div class="vid-views">▶ ${v.views}</div>
+        </div>
+        <div class="vid-meta">
+          <div class="vid-title">${v.title}</div>
+          <div class="vid-info">
+            <div class="vid-type">${v.category.toUpperCase()}</div>
+            <div class="vid-date">${v.date}</div>
+          </div>
+        </div>
+      </div>`).join('');
+    triggerReveal();
+  } catch(e){ grid.innerHTML = '<p style="color:var(--text-dim);padding:1rem">Ошибка загрузки видео</p>'; }
+}
+
+// ── ИНИЦИАЛИЗАЦИЯ ───────────────────────────────────────
+renderNavAuth();
+loadAchievements();
+loadServers();
+loadVideos();
+</script>
+</body>
+</html>

@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WF | Вход / Регистрация</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --void: #020005;
+    --obsidian: #0a0010;
+    --deep: #0d0018;
+    --purple-core: #4B0082;
+    --purple-glow: #6a00b8;
+    --purple-neon: #9b30ff;
+    --purple-bright: #bf5fff;
+    --purple-mist: rgba(75,0,130,0.15);
+    --ember: #ff4500;
+    --steel: #1a1a2e;
+    --rust-orange: #c84b11;
+    --text-primary: #e8ddf5;
+    --text-dim: #7a6d8a;
+    --glass-bg: rgba(15, 0, 25, 0.6);
+    --glass-border: rgba(155, 48, 255, 0.2);
+    --success: #00ff88;
+    --error: #ff3355;
+  }
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--void);
+    color: var(--text-primary);
+    font-family: 'Rajdhani', sans-serif;
+    overflow-x: hidden;
+    cursor: none;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* CUSTOM CURSOR */
+  .cursor {
+    position: fixed;
+    width: 8px; height: 8px;
+    background: var(--purple-neon);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    transition: transform 0.1s;
+    box-shadow: 0 0 10px var(--purple-neon), 0 0 20px var(--purple-core);
+  }
+  .cursor-ring {
+    position: fixed;
+    width: 32px; height: 32px;
+    border: 1px solid rgba(155,48,255,0.5);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9998;
+    transition: transform 0.15s ease, width 0.2s, height 0.2s;
+    transform: translate(-12px, -12px);
+  }
+
+  /* NOISE OVERLAY */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9997;
+    opacity: 0.4;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 22px 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: linear-gradient(180deg, rgba(2,0,5,0.95) 0%, transparent 100%);
+  }
+  .nav-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    letter-spacing: 6px;
+    color: var(--text-primary);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .nav-logo img { height: 38px; filter: drop-shadow(0 0 8px var(--purple-neon)); }
+  .nav-logo span { color: var(--purple-neon); }
+  .nav-back {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    color: var(--text-dim);
+    text-decoration: none;
+    letter-spacing: 2px;
+    border: 1px solid var(--glass-border);
+    padding: 8px 20px;
+    transition: all 0.3s;
+    text-transform: uppercase;
+  }
+  .nav-back:hover {
+    color: var(--purple-neon);
+    border-color: var(--purple-neon);
+    box-shadow: 0 0 15px rgba(155,48,255,0.2);
+  }
+
+  /* AMBIENT ORBS */
+  .orb {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(120px);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .orb-1 {
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(75,0,130,0.3) 0%, transparent 70%);
+    top: -100px; left: -100px;
+    animation: orbFloat1 12s ease-in-out infinite;
+  }
+  .orb-2 {
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(155,48,255,0.2) 0%, transparent 70%);
+    bottom: 0; right: -50px;
+    animation: orbFloat2 15s ease-in-out infinite;
+  }
+  .orb-3 {
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(200,75,17,0.1) 0%, transparent 70%);
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    animation: orbFloat3 10s ease-in-out infinite;
+  }
+  @keyframes orbFloat1 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(60px,40px)} }
+  @keyframes orbFloat2 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-40px,-60px)} }
+  @keyframes orbFloat3 { 0%,100%{transform:translate(-50%,-50%) scale(1)} 50%{transform:translate(-50%,-50%) scale(1.3)} }
+
+  /* GRID BG */
+  .grid-bg {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    background-image:
+      linear-gradient(rgba(155,48,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(155,48,255,0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+  }
+
+  /* MAIN LAYOUT */
+  .auth-wrapper {
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 120px 20px 60px;
+  }
+
+  .auth-container {
+    width: 100%;
+    max-width: 460px;
+  }
+
+  /* HEADER */
+  .auth-header {
+    text-align: center;
+    margin-bottom: 40px;
+    animation: fadeDown 0.6s ease forwards;
+  }
+  .auth-header .tag {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--purple-neon);
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    opacity: 0.8;
+  }
+  .auth-header h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 52px;
+    letter-spacing: 8px;
+    line-height: 1;
+    background: linear-gradient(135deg, var(--text-primary) 0%, var(--purple-bright) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 8px;
+  }
+  .auth-header p {
+    font-size: 14px;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+  }
+
+  /* TABS */
+  .auth-tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 32px;
+    border: 1px solid var(--glass-border);
+    animation: fadeDown 0.6s 0.1s ease both;
+  }
+  .tab-btn {
+    flex: 1;
+    padding: 14px;
+    background: transparent;
+    border: none;
+    color: var(--text-dim);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;
+    letter-spacing: 3px;
+    cursor: none;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+  .tab-btn::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--purple-neon);
+    transform: scaleX(0);
+    transition: transform 0.3s;
+  }
+  .tab-btn.active {
+    color: var(--text-primary);
+    background: rgba(155,48,255,0.08);
+  }
+  .tab-btn.active::after { transform: scaleX(1); }
+  .tab-btn:hover:not(.active) { color: var(--purple-bright); background: rgba(155,48,255,0.04); }
+
+  /* CARD */
+  .auth-card {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(20px);
+    padding: 40px;
+    position: relative;
+    overflow: hidden;
+    animation: fadeUp 0.6s 0.2s ease both;
+  }
+  .auth-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--purple-neon), transparent);
+    opacity: 0.5;
+  }
+  .auth-card::after {
+    content: '';
+    position: absolute;
+    top: -80px; right: -80px;
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, rgba(75,0,130,0.15) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  /* FORM PANELS */
+  .form-panel { display: none; }
+  .form-panel.active { display: block; }
+
+  /* INPUT GROUPS */
+  .input-group {
+    margin-bottom: 20px;
+    position: relative;
+  }
+  .input-group label {
+    display: block;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .input-wrap {
+    position: relative;
+  }
+  .input-wrap input {
+    width: 100%;
+    background: rgba(2,0,5,0.8);
+    border: 1px solid rgba(155,48,255,0.2);
+    color: var(--text-primary);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    padding: 13px 44px 13px 16px;
+    outline: none;
+    transition: all 0.3s;
+    letter-spacing: 0.5px;
+  }
+  .input-wrap input::placeholder { color: rgba(122,109,138,0.5); }
+  .input-wrap input:focus {
+    border-color: var(--purple-neon);
+    background: rgba(75,0,130,0.08);
+    box-shadow: 0 0 0 3px rgba(155,48,255,0.08), inset 0 0 20px rgba(155,48,255,0.03);
+  }
+  .input-wrap input.error {
+    border-color: var(--error);
+    box-shadow: 0 0 0 3px rgba(255,51,85,0.08);
+  }
+  .input-wrap input.success {
+    border-color: var(--success);
+  }
+  .input-icon {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-dim);
+    font-size: 16px;
+    pointer-events: none;
+    transition: color 0.3s;
+  }
+  .input-wrap input:focus ~ .input-icon { color: var(--purple-neon); }
+
+  /* PASSWORD TOGGLE */
+  .pass-toggle {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    cursor: none;
+    font-size: 14px;
+    padding: 2px;
+    transition: color 0.3s;
+    font-family: 'Share Tech Mono', monospace;
+    letter-spacing: 1px;
+  }
+  .pass-toggle:hover { color: var(--purple-neon); }
+
+  /* STRENGTH BAR */
+  .strength-bar {
+    display: flex;
+    gap: 4px;
+    margin-top: 8px;
+    height: 3px;
+  }
+  .strength-seg {
+    flex: 1;
+    background: rgba(155,48,255,0.1);
+    transition: background 0.3s;
+    border-radius: 2px;
+  }
+  .strength-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+    margin-top: 4px;
+    letter-spacing: 2px;
+  }
+
+  /* FIELD ERROR */
+  .field-err {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--error);
+    letter-spacing: 1px;
+    margin-top: 6px;
+    opacity: 0;
+    transform: translateY(-4px);
+    transition: all 0.2s;
+  }
+  .field-err.show { opacity: 1; transform: translateY(0); }
+
+  /* EXTRA ROW */
+  .extra-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 28px;
+    margin-top: -4px;
+  }
+
+  /* CHECKBOX */
+  .check-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: none;
+  }
+  .check-wrap input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 16px; height: 16px;
+    border: 1px solid rgba(155,48,255,0.3);
+    background: rgba(2,0,5,0.8);
+    cursor: none;
+    position: relative;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+  .check-wrap input[type="checkbox"]:checked {
+    background: var(--purple-core);
+    border-color: var(--purple-neon);
+  }
+  .check-wrap input[type="checkbox"]:checked::after {
+    content: '✓';
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--purple-neon);
+    font-size: 11px;
+  }
+  .check-wrap label {
+    font-size: 13px;
+    color: var(--text-dim);
+    cursor: none;
+    letter-spacing: 0.5px;
+  }
+
+  .forgot-link {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    text-decoration: none;
+    letter-spacing: 1px;
+    transition: color 0.2s;
+  }
+  .forgot-link:hover { color: var(--purple-bright); }
+
+  /* SUBMIT BUTTON */
+  .submit-btn {
+    width: 100%;
+    padding: 16px;
+    background: transparent;
+    border: 1px solid var(--purple-neon);
+    color: var(--text-primary);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px;
+    letter-spacing: 5px;
+    cursor: none;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s;
+    margin-bottom: 24px;
+  }
+  .submit-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, var(--purple-core) 0%, var(--purple-glow) 100%);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .submit-btn:hover::before { opacity: 1; }
+  .submit-btn:hover {
+    box-shadow: 0 0 30px rgba(155,48,255,0.4);
+    letter-spacing: 7px;
+  }
+  .submit-btn span { position: relative; z-index: 1; }
+  .submit-btn.loading { pointer-events: none; opacity: 0.7; }
+  .submit-btn .btn-loader {
+    display: none;
+    position: absolute;
+    inset: 0;
+    align-items: center;
+    justify-content: center;
+    background: rgba(15,0,25,0.9);
+    z-index: 2;
+  }
+  .submit-btn.loading .btn-loader { display: flex; }
+  .dots span {
+    display: inline-block;
+    width: 6px; height: 6px;
+    background: var(--purple-neon);
+    border-radius: 50%;
+    margin: 0 3px;
+    animation: bounce 0.6s ease-in-out infinite;
+  }
+  .dots span:nth-child(2) { animation-delay: 0.1s; }
+  .dots span:nth-child(3) { animation-delay: 0.2s; }
+  @keyframes bounce { 0%,80%,100%{transform:scale(0)} 40%{transform:scale(1)} }
+
+
+
+  /* TERMS */
+  .terms-row {
+    margin-top: -8px;
+    margin-bottom: 24px;
+  }
+  .terms-row .check-wrap label {
+    font-size: 12px;
+    line-height: 1.5;
+  }
+  .terms-row a {
+    color: var(--purple-bright);
+    text-decoration: none;
+  }
+  .terms-row a:hover { text-decoration: underline; }
+
+  /* SWITCH LINK */
+  .switch-link {
+    text-align: center;
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+  .switch-link a {
+    color: var(--purple-bright);
+    text-decoration: none;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    transition: color 0.2s;
+  }
+  .switch-link a:hover { color: var(--purple-neon); }
+
+  /* ALERT */
+  .alert {
+    padding: 12px 16px;
+    margin-bottom: 20px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 1px;
+    display: none;
+    align-items: center;
+    gap: 10px;
+    border-left: 3px solid;
+  }
+  .alert.show { display: flex; }
+  .alert.success {
+    background: rgba(0,255,136,0.05);
+    border-color: var(--success);
+    color: var(--success);
+  }
+  .alert.error {
+    background: rgba(255,51,85,0.05);
+    border-color: var(--error);
+    color: var(--error);
+  }
+
+  /* SCAN LINE */
+  .scan-line {
+    position: fixed;
+    top: -2px; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--purple-neon), transparent);
+    opacity: 0.4;
+    animation: scanMove 6s linear infinite;
+    z-index: 9996;
+    pointer-events: none;
+  }
+  @keyframes scanMove { from{top:-2px} to{top:100vh} }
+
+  /* DECORATIVE CORNERS */
+  .corner {
+    position: absolute;
+    width: 20px; height: 20px;
+    border-color: var(--purple-neon);
+    border-style: solid;
+    opacity: 0.4;
+  }
+  .corner-tl { top: 0; left: 0; border-width: 1px 0 0 1px; }
+  .corner-tr { top: 0; right: 0; border-width: 1px 1px 0 0; }
+  .corner-bl { bottom: 0; left: 0; border-width: 0 0 1px 1px; }
+  .corner-br { bottom: 0; right: 0; border-width: 0 1px 1px 0; }
+
+  /* ANIMATIONS */
+  @keyframes fadeDown {
+    from { opacity:0; transform:translateY(-20px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+  @keyframes fadeUp {
+    from { opacity:0; transform:translateY(20px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 520px) {
+    nav { padding: 18px 24px; }
+    .auth-card { padding: 28px 20px; }
+    .auth-header h1 { font-size: 40px; }
+
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+<div class="scan-line"></div>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+<div class="grid-bg"></div>
+
+<nav>
+  <a href="/" class="nav-logo">
+    <img src="standard_7.gif" alt="WF" onerror="this.style.display='none'">
+    <span>WF</span>
+  </a>
+  <a href="/" class="nav-back">← Главная</a>
+</nav>
+
+<main class="auth-wrapper">
+  <div class="auth-container">
+
+    <div class="auth-header">
+      <div class="tag">// WASTELAND FORSAKEN //</div>
+      <h1 id="authTitle">ВХОД</h1>
+      <p id="authSubtitle">Доступ к личному кабинету клана</p>
+    </div>
+
+    <div class="auth-tabs">
+      <button class="tab-btn active" id="tabLogin" onclick="switchTab('login')">ВХОД</button>
+      <button class="tab-btn" id="tabRegister" onclick="switchTab('register')">РЕГИСТРАЦИЯ</button>
+    </div>
+
+    <div class="auth-card" id="authCard">
+      <div class="corner corner-tl"></div>
+      <div class="corner corner-tr"></div>
+      <div class="corner corner-bl"></div>
+      <div class="corner corner-br"></div>
+
+      <!-- ALERTS -->
+      <div class="alert success" id="alertSuccess">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+        <span id="alertSuccessText"></span>
+      </div>
+      <div class="alert error" id="alertError">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <span id="alertErrorText"></span>
+      </div>
+
+      <!-- LOGIN PANEL -->
+      <div class="form-panel active" id="panelLogin">
+        <div class="input-group">
+          <label>Никнейм / Email</label>
+          <div class="input-wrap">
+            <input type="text" id="loginUsername" placeholder="your_nickname" autocomplete="username">
+            <span class="input-icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </span>
+          </div>
+          <div class="field-err" id="loginUsernameErr">Введите никнейм или email</div>
+        </div>
+
+        <div class="input-group">
+          <label>Пароль</label>
+          <div class="input-wrap">
+            <input type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password">
+            <button class="pass-toggle" onclick="togglePass('loginPassword', this)" tabindex="-1">SHOW</button>
+          </div>
+          <div class="field-err" id="loginPasswordErr">Введите пароль</div>
+        </div>
+
+        <div class="extra-row">
+          <label class="check-wrap">
+            <input type="checkbox" id="rememberMe">
+            <label for="rememberMe">Запомнить меня</label>
+          </label>
+          <a href="#" class="forgot-link">ЗАБЫЛИ ПАРОЛЬ?</a>
+        </div>
+
+        <button class="submit-btn" id="loginBtn" onclick="handleLogin()">
+          <span>ВОЙТИ</span>
+          <div class="btn-loader"><div class="dots"><span></span><span></span><span></span></div></div>
+        </button>
+
+      </div>
+
+      <!-- REGISTER PANEL -->
+      <div class="form-panel" id="panelRegister">
+        <div class="input-group">
+          <label>Никнейм в Rust</label>
+          <div class="input-wrap">
+            <input type="text" id="regNickname" placeholder="YourRustName" oninput="checkNickname(this)" autocomplete="username">
+            <span class="input-icon" id="nicknameIcon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </span>
+          </div>
+          <div class="field-err" id="regNicknameErr">Минимум 3 символа</div>
+        </div>
+
+        <div class="input-group">
+          <label>Email</label>
+          <div class="input-wrap">
+            <input type="email" id="regEmail" placeholder="you@example.com" oninput="validateEmail(this)" autocomplete="email">
+            <span class="input-icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            </span>
+          </div>
+          <div class="field-err" id="regEmailErr">Введите корректный email</div>
+        </div>
+
+        <div class="input-group">
+          <label>Пароль</label>
+          <div class="input-wrap">
+            <input type="password" id="regPassword" placeholder="Минимум 8 символов" oninput="checkStrength(this)" autocomplete="new-password">
+            <button class="pass-toggle" onclick="togglePass('regPassword', this)" tabindex="-1">SHOW</button>
+          </div>
+          <div class="strength-bar" id="strengthBar">
+            <div class="strength-seg" id="seg1"></div>
+            <div class="strength-seg" id="seg2"></div>
+            <div class="strength-seg" id="seg3"></div>
+            <div class="strength-seg" id="seg4"></div>
+          </div>
+          <div class="strength-label" id="strengthLabel"></div>
+          <div class="field-err" id="regPasswordErr">Минимум 8 символов</div>
+        </div>
+
+        <div class="input-group">
+          <label>Повтор пароля</label>
+          <div class="input-wrap">
+            <input type="password" id="regConfirm" placeholder="Повторите пароль" oninput="checkMatch(this)" autocomplete="new-password">
+            <span class="input-icon" id="confirmIcon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </span>
+          </div>
+          <div class="field-err" id="regConfirmErr">Пароли не совпадают</div>
+        </div>
+
+        <div class="terms-row">
+          <label class="check-wrap">
+            <input type="checkbox" id="acceptTerms">
+            <label for="acceptTerms">Я принимаю <a href="#">правила клана</a> и <a href="#">политику конфиденциальности</a></label>
+          </label>
+          <div class="field-err" id="termsErr">Необходимо принять правила</div>
+        </div>
+
+        <button class="submit-btn" id="registerBtn" onclick="handleRegister()">
+          <span>СОЗДАТЬ АККАУНТ</span>
+          <div class="btn-loader"><div class="dots"><span></span><span></span><span></span></div></div>
+        </button>
+
+      </div>
+
+    </div><!-- /auth-card -->
+
+    <p class="switch-link" id="switchLink">
+      Нет аккаунта? <a href="#" onclick="switchTab('register');return false;">Зарегистрироваться</a>
+    </p>
+
+  </div>
+</main>
+
+<script>
+// CURSOR
+const cursor = document.getElementById('cursor');
+const ring = document.getElementById('cursorRing');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove', e=>{
+  mx=e.clientX; my=e.clientY;
+  cursor.style.left = (mx-4)+'px';
+  cursor.style.top  = (my-4)+'px';
+});
+(function raf(){
+  rx += (mx-rx)*0.12; ry += (my-ry)*0.12;
+  ring.style.left = (rx-16)+'px';
+  ring.style.top  = (ry-16)+'px';
+  requestAnimationFrame(raf);
+})();
+document.querySelectorAll('a,button,input,label,.tab-btn').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{ cursor.style.transform='scale(2)'; ring.style.width='48px'; ring.style.height='48px'; });
+  el.addEventListener('mouseleave',()=>{ cursor.style.transform='scale(1)'; ring.style.width='32px'; ring.style.height='32px'; });
+});
+
+// TAB SWITCH
+function switchTab(tab) {
+  const isLogin = tab === 'login';
+  document.getElementById('tabLogin').classList.toggle('active', isLogin);
+  document.getElementById('tabRegister').classList.toggle('active', !isLogin);
+  document.getElementById('panelLogin').classList.toggle('active', isLogin);
+  document.getElementById('panelRegister').classList.toggle('active', !isLogin);
+  document.getElementById('authTitle').textContent = isLogin ? 'ВХОД' : 'РЕГИСТРАЦИЯ';
+  document.getElementById('authSubtitle').textContent = isLogin ? 'Доступ к личному кабинету клана' : 'Создайте аккаунт участника WF';
+  document.getElementById('switchLink').innerHTML = isLogin
+    ? 'Нет аккаунта? <a href="#" onclick="switchTab(\'register\');return false;">Зарегистрироваться</a>'
+    : 'Уже есть аккаунт? <a href="#" onclick="switchTab(\'login\');return false;">Войти</a>';
+  hideAlerts();
+  // animate card
+  const card = document.getElementById('authCard');
+  card.style.opacity='0'; card.style.transform='translateY(10px)';
+  setTimeout(()=>{ card.style.transition='opacity 0.3s,transform 0.3s'; card.style.opacity='1'; card.style.transform='translateY(0)'; },10);
+}
+
+// TOGGLE PASSWORD
+function togglePass(id, btn) {
+  const input = document.getElementById(id);
+  if(input.type==='password'){ input.type='text'; btn.textContent='HIDE'; }
+  else { input.type='password'; btn.textContent='SHOW'; }
+}
+
+// STRENGTH
+function checkStrength(input) {
+  const v = input.value;
+  let score = 0;
+  if(v.length>=8) score++;
+  if(/[A-Z]/.test(v)) score++;
+  if(/[0-9]/.test(v)) score++;
+  if(/[^A-Za-z0-9]/.test(v)) score++;
+  const segs = ['seg1','seg2','seg3','seg4'];
+  const colors = ['#ff3355','#ff8c00','#ffcc00','#00ff88'];
+  const labels = ['','СЛАБЫЙ','СРЕДНИЙ','СИЛЬНЫЙ','МАКСИМУМ'];
+  segs.forEach((id,i)=>{
+    const el = document.getElementById(id);
+    el.style.background = i < score ? colors[score-1] : 'rgba(155,48,255,0.1)';
+  });
+  document.getElementById('strengthLabel').textContent = v ? labels[score] : '';
+}
+
+// VALIDATE EMAIL
+function validateEmail(input) {
+  const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.value);
+  input.classList.toggle('success', ok && input.value);
+  input.classList.toggle('error', !ok && input.value);
+}
+
+// CHECK NICKNAME
+function checkNickname(input) {
+  const ok = input.value.length >= 3;
+  input.classList.toggle('success', ok);
+  input.classList.toggle('error', !ok && input.value);
+}
+
+// CHECK MATCH
+function checkMatch(input) {
+  const pass = document.getElementById('regPassword').value;
+  const ok = input.value === pass && input.value;
+  input.classList.toggle('success', ok);
+  input.classList.toggle('error', !ok && input.value);
+  const icon = document.getElementById('confirmIcon');
+  if(ok) icon.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00ff88" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>';
+}
+
+function showErr(id, msg) {
+  const el = document.getElementById(id);
+  if(msg) el.textContent = msg;
+  el.classList.add('show');
+}
+function hideErr(id) { document.getElementById(id).classList.remove('show'); }
+function hideAlerts() {
+  document.getElementById('alertSuccess').classList.remove('show');
+  document.getElementById('alertError').classList.remove('show');
+}
+function showAlert(type, msg) {
+  hideAlerts();
+  const el = document.getElementById(type==='success' ? 'alertSuccess' : 'alertError');
+  document.getElementById(type==='success' ? 'alertSuccessText' : 'alertErrorText').textContent = msg;
+  el.classList.add('show');
+}
+
+// LOGIN
+async function handleLogin() {
+  hideAlerts();
+  let valid = true;
+  const username = document.getElementById('loginUsername').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  if(!username){ showErr('loginUsernameErr'); valid=false; } else hideErr('loginUsernameErr');
+  if(!password){ showErr('loginPasswordErr'); valid=false; } else hideErr('loginPasswordErr');
+  if(!valid) return;
+  const btn = document.getElementById('loginBtn');
+  btn.classList.add('loading');
+  try {
+    const res  = await fetch('/api/auth/login/', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({username, password}),
+    });
+    const data = await res.json();
+    if(data.ok) {
+      localStorage.setItem('wf_token',    data.token);
+      localStorage.setItem('wf_username', data.username);
+      showAlert('success', 'ДОБРО ПОЖАЛОВАТЬ, ' + data.username.toUpperCase() + '!');
+      setTimeout(()=>{ window.location.href = '/hub/'; }, 1200);
+    } else {
+      showAlert('error', data.error || 'Ошибка входа');
+    }
+  } catch(e) {
+    showAlert('error', 'Ошибка соединения с сервером');
+  } finally {
+    btn.classList.remove('loading');
+  }
+}
+
+// REGISTER
+async function handleRegister() {
+  hideAlerts();
+  let valid = true;
+  const nick  = document.getElementById('regNickname').value.trim();
+  const email = document.getElementById('regEmail').value.trim();
+  const pass  = document.getElementById('regPassword').value;
+  const conf  = document.getElementById('regConfirm').value;
+  const terms = document.getElementById('acceptTerms').checked;
+  if(nick.length<3){ showErr('regNicknameErr','Минимум 3 символа'); valid=false; } else hideErr('regNicknameErr');
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ showErr('regEmailErr','Введите корректный email'); valid=false; } else hideErr('regEmailErr');
+  if(pass.length<8){ showErr('regPasswordErr','Минимум 8 символов'); valid=false; } else hideErr('regPasswordErr');
+  if(pass!==conf){ showErr('regConfirmErr','Пароли не совпадают'); valid=false; } else hideErr('regConfirmErr');
+  if(!terms){ showErr('termsErr','Необходимо принять правила'); valid=false; } else hideErr('termsErr');
+  if(!valid) return;
+  const btn = document.getElementById('registerBtn');
+  btn.classList.add('loading');
+  try {
+    const res  = await fetch('/api/auth/register/', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({username: nick, email, password: pass}),
+    });
+    const data = await res.json();
+    if(data.ok) {
+      localStorage.setItem('wf_token',    data.token);
+      localStorage.setItem('wf_username', data.username);
+      showAlert('success', 'АККАУНТ СОЗДАН! ДОБРО ПОЖАЛОВАТЬ В WF!');
+      setTimeout(()=>{ window.location.href = '/hub/'; }, 1500);
+    } else {
+      showAlert('error', data.error || 'Ошибка регистрации');
+    }
+  } catch(e) {
+    showAlert('error', 'Ошибка соединения с сервером');
+  } finally {
+    btn.classList.remove('loading');
+  }
+}
+</script>
+</body>
+</html>
