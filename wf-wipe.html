@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WF | Wipe Info</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --void: #020005;
+    --obsidian: #0a0010;
+    --deep: #0d0018;
+    --purple-core: #4B0082;
+    --purple-glow: #6a00b8;
+    --purple-neon: #9b30ff;
+    --purple-bright: #bf5fff;
+    --purple-mist: rgba(75,0,130,0.15);
+    --ember: #ff4500;
+    --rust-orange: #c84b11;
+    --text-primary: #e8ddf5;
+    --text-dim: #7a6d8a;
+    --glass-bg: rgba(15, 0, 25, 0.6);
+    --glass-border: rgba(155, 48, 255, 0.2);
+    --green: #00ff88;
+    --green-dim: rgba(0,255,136,0.15);
+  }
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--void);
+    color: var(--text-primary);
+    font-family: 'Rajdhani', sans-serif;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* CURSOR */
+  .cursor { position: fixed; width: 8px; height: 8px; background: var(--purple-neon); border-radius: 50%; pointer-events: none; z-index: 9999; transition: transform 0.1s; box-shadow: 0 0 10px var(--purple-neon), 0 0 20px var(--purple-core); }
+  .cursor-ring { position: fixed; width: 32px; height: 32px; border: 1px solid rgba(155,48,255,0.5); border-radius: 50%; pointer-events: none; z-index: 9998; transition: transform 0.15s ease, width 0.2s, height 0.2s; transform: translate(-12px, -12px); }
+
+  /* NOISE */
+  body::before { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E"); pointer-events: none; z-index: 9997; opacity: 0.4; }
+
+  /* ─── NAV ─── */
+  nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding: 22px 60px; display: flex; align-items: center; justify-content: space-between; background: linear-gradient(180deg, rgba(2,0,5,0.95) 0%, transparent 100%); border-bottom: 1px solid rgba(75,0,130,0.15); backdrop-filter: blur(4px); }
+  .nav-logo-text { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 4px; color: var(--text-primary); text-decoration: none; text-shadow: 0 0 20px var(--purple-neon), 0 0 40px var(--purple-core); }
+  .nav-links { display: flex; gap: 48px; list-style: none; }
+  .nav-links a { font-family: 'Share Tech Mono', monospace; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: var(--text-dim); text-decoration: none; transition: color 0.3s, text-shadow 0.3s; position: relative; }
+  .nav-links a::after { content: ''; position: absolute; bottom: -4px; left: 0; right: 0; height: 1px; background: var(--purple-neon); transform: scaleX(0); transition: transform 0.3s; box-shadow: 0 0 8px var(--purple-neon); }
+  .nav-links a:hover { color: var(--purple-bright); text-shadow: 0 0 12px var(--purple-neon); }
+  .nav-links a:hover::after, .nav-links a.active::after { transform: scaleX(1); }
+  .nav-links a.active { color: var(--purple-neon); }
+  .nav-logo { display: flex; align-items: center; text-decoration: none; }
+  .nav-hub { color: var(--purple-neon) !important; font-weight: 600; }
+  .nav-login { font-family: 'Share Tech Mono', monospace; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: var(--text-dim); text-decoration: none; border: 1px solid rgba(155,48,255,.25); padding: 10px 18px; clip-path: polygon(8px 0%,100% 0%,calc(100% - 8px) 100%,0% 100%); transition: all .3s; }
+  .nav-login:hover { color: var(--purple-bright); border-color: var(--purple-neon); }
+  .nav-cta { font-family: 'Share Tech Mono', monospace; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: var(--purple-neon); border: 1px solid var(--purple-core); padding: 10px 24px; text-decoration: none; transition: all 0.3s; clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%); background: rgba(75,0,130,0.1); }
+  .nav-cta:hover { background: var(--purple-core); color: #fff; box-shadow: 0 0 30px rgba(75,0,130,0.8); }
+
+  /* ─── HERO ─── */
+  .page-hero { position: relative; padding: 150px 60px 60px; text-align: center; overflow: hidden; }
+  .page-hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(75,0,130,0.25) 0%, transparent 70%); pointer-events: none; }
+  .page-hero-label { font-family: 'Share Tech Mono', monospace; font-size: 11px; letter-spacing: 6px; color: var(--purple-neon); text-transform: uppercase; margin-bottom: 16px; opacity: 0.8; }
+  .page-hero-title { font-family: 'Bebas Neue', sans-serif; font-size: clamp(64px, 10vw, 120px); letter-spacing: 12px; line-height: 1; background: linear-gradient(135deg, #fff 0%, var(--purple-bright) 50%, var(--purple-neon) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; filter: drop-shadow(0 0 40px rgba(155,48,255,0.5)); margin-bottom: 12px; }
+  .status-badge { display: inline-flex; align-items: center; gap: 8px; font-family: 'Share Tech Mono', monospace; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; padding: 6px 18px; border-radius: 2px; margin-bottom: 16px; }
+  .status-badge.active { background: rgba(0,255,136,0.1); border: 1px solid rgba(0,255,136,0.4); color: var(--green); }
+  .status-badge.active::before { content: ''; display: block; width: 6px; height: 6px; border-radius: 50%; background: var(--green); box-shadow: 0 0 8px var(--green); animation: pulse 1.5s ease-in-out infinite; }
+  .status-badge.no-wipe { background: rgba(120,0,0,0.2); border: 1px solid rgba(200,0,0,0.3); color: #ff6666; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+  .hero-line { width: 120px; height: 1px; margin: 20px auto 0; background: linear-gradient(90deg, transparent, var(--purple-neon), transparent); box-shadow: 0 0 12px var(--purple-neon); }
+
+  /* ─── MAIN LAYOUT ─── */
+  .main { padding: 0 60px 100px; max-width: 1400px; margin: 0 auto; }
+
+  /* ─── CURRENT WIPE CARD ─── */
+  .wipe-card {
+    position: relative; margin-bottom: 60px; overflow: hidden;
+    background: var(--glass-bg); border: 1px solid var(--glass-border);
+    backdrop-filter: blur(12px);
+    clip-path: polygon(0 0, calc(100% - 24px) 0, 100% 24px, 100% 100%, 24px 100%, 0 calc(100% - 24px));
+  }
+  .wipe-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent 0%, var(--green) 30%, var(--purple-neon) 70%, transparent 100%); }
+
+  .wipe-card-header { padding: 32px 40px 24px; border-bottom: 1px solid rgba(155,48,255,0.1); display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+  .wipe-title { font-family: 'Bebas Neue', sans-serif; font-size: 42px; letter-spacing: 4px; color: var(--text-primary); line-height: 1; }
+  .wipe-num { color: var(--purple-neon); text-shadow: 0 0 20px var(--purple-neon); }
+
+  /* COUNTDOWN */
+  .countdown-wrap { text-align: right; }
+  .countdown-label { font-family: 'Share Tech Mono', monospace; font-size: 10px; letter-spacing: 3px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 6px; }
+  .countdown { display: flex; gap: 12px; justify-content: flex-end; }
+  .cd-block { text-align: center; }
+  .cd-num { font-family: 'Bebas Neue', sans-serif; font-size: 36px; letter-spacing: 2px; color: var(--purple-bright); line-height: 1; text-shadow: 0 0 20px rgba(155,48,255,0.6); }
+  .cd-sep { font-family: 'Bebas Neue', sans-serif; font-size: 36px; color: var(--text-dim); align-self: center; }
+  .cd-unit { font-family: 'Share Tech Mono', monospace; font-size: 9px; letter-spacing: 2px; color: var(--text-dim); text-transform: uppercase; }
+
+  /* WIPE INFO GRID */
+  .wipe-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+  @media (max-width: 768px) { .wipe-info-grid { grid-template-columns: 1fr; } }
+
+  .wipe-info-block { padding: 24px 40px; border-bottom: 1px solid rgba(155,48,255,0.08); }
+  .wipe-info-block:nth-child(odd) { border-right: 1px solid rgba(155,48,255,0.08); }
+  .info-label { font-family: 'Share Tech Mono', monospace; font-size: 10px; letter-spacing: 3px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 10px; }
+
+  .server-name { font-family: 'Rajdhani', sans-serif; font-size: 20px; font-weight: 600; color: var(--text-primary); }
+
+  /* CONNECT */
+  .connect-box { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .connect-cmd { font-family: 'Share Tech Mono', monospace; font-size: 15px; color: var(--green); background: rgba(0,255,136,0.06); border: 1px solid rgba(0,255,136,0.2); padding: 10px 16px; flex: 1; min-width: 0; word-break: break-all; }
+  .copy-btn {
+    font-family: 'Share Tech Mono', monospace; font-size: 10px; letter-spacing: 2px;
+    text-transform: uppercase; cursor: pointer; border: 1px solid rgba(0,255,136,0.4);
+    background: rgba(0,255,136,0.08); color: var(--green); padding: 10px 18px;
+    transition: all 0.2s; white-space: nowrap; flex-shrink: 0;
+    clip-path: polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%);
+  }
+  .copy-btn:hover { background: rgba(0,255,136,0.2); box-shadow: 0 0 20px rgba(0,255,136,0.2); }
+  .copy-btn.copied { color: #fff; background: rgba(0,255,136,0.3); }
+
+  /* WIPE DATE */
+  .wipe-date-str { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 3px; color: var(--ember); text-shadow: 0 0 16px rgba(255,69,0,0.5); }
+
+  /* RAID PLAN */
+  .raid-plan-text { font-family: 'Share Tech Mono', monospace; font-size: 13px; color: var(--text-primary); line-height: 1.8; white-space: pre-line; }
+
+  /* DESCRIPTION */
+  .desc-text { font-size: 16px; color: var(--text-dim); line-height: 1.6; white-space: pre-line; }
+
+  /* ─── SQUAD ─── */
+  .section-title { font-family: 'Bebas Neue', sans-serif; font-size: 32px; letter-spacing: 6px; color: var(--text-primary); margin-bottom: 24px; display: flex; align-items: center; gap: 16px; }
+  .section-title::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, rgba(155,48,255,0.4), transparent); }
+  .section-title span { font-family: 'Share Tech Mono', monospace; font-size: 13px; letter-spacing: 2px; color: var(--text-dim); font-weight: 400; }
+
+  .squad-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin-bottom: 60px; }
+
+  .squad-card { display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: var(--glass-bg); border: 1px solid var(--glass-border); transition: border-color 0.25s, transform 0.25s; }
+  .squad-card:hover { border-color: rgba(155,48,255,0.4); transform: translateX(4px); }
+  .squad-avatar { width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0; border: 1px solid rgba(155,48,255,0.3); background: linear-gradient(135deg, var(--purple-core), var(--obsidian)); display: flex; align-items: center; justify-content: center; font-family: 'Bebas Neue', sans-serif; font-size: 16px; color: var(--purple-bright); overflow: hidden; }
+  .squad-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .squad-info { min-width: 0; }
+  .squad-nick { font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .squad-spec { font-family: 'Share Tech Mono', monospace; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-dim); margin-top: 2px; }
+
+  /* SPEC COLOR */
+  .spec-raider  { color: #ff6644; }
+  .spec-pvp     { color: #ff4488; }
+  .spec-builder { color: #44aaff; }
+  .spec-farmer  { color: #88dd44; }
+  .spec-any     { color: var(--text-dim); }
+
+  /* ─── ARCHIVE ─── */
+  .archive-list { display: flex; flex-direction: column; gap: 8px; }
+  .archive-item { background: var(--glass-bg); border: 1px solid var(--glass-border); overflow: hidden; transition: border-color 0.2s; }
+  .archive-item:hover { border-color: rgba(155,48,255,0.35); }
+  .archive-header { display: flex; align-items: center; gap: 16px; padding: 16px 24px; cursor: pointer; user-select: none; }
+  .archive-num { font-family: 'Share Tech Mono', monospace; font-size: 10px; letter-spacing: 2px; color: var(--text-dim); min-width: 32px; }
+  .archive-title { font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 2px; flex: 1; }
+  .archive-date { font-family: 'Share Tech Mono', monospace; font-size: 10px; letter-spacing: 2px; color: var(--text-dim); }
+  .archive-arrow { font-size: 12px; color: var(--text-dim); transition: transform 0.25s; }
+  .archive-item.open .archive-arrow { transform: rotate(90deg); }
+
+  .archive-body { display: none; padding: 0 24px 20px; border-top: 1px solid rgba(155,48,255,0.08); }
+  .archive-item.open .archive-body { display: block; }
+  .archive-body-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 24px; margin-top: 16px; }
+  .archive-field-label { font-family: 'Share Tech Mono', monospace; font-size: 9px; letter-spacing: 2px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px; }
+  .archive-field-value { font-size: 15px; color: var(--text-primary); font-weight: 500; }
+  .archive-field-value.green { font-family: 'Share Tech Mono', monospace; color: var(--green); font-size: 13px; }
+  .archive-squad-mini { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+  .archive-squad-chip { font-family: 'Share Tech Mono', monospace; font-size: 10px; letter-spacing: 1px; padding: 3px 10px; border: 1px solid rgba(155,48,255,0.2); color: var(--text-dim); }
+
+  /* EMPTY */
+  .empty-wipe { text-align: center; padding: 80px 20px; }
+  .empty-icon { font-size: 56px; opacity: 0.3; margin-bottom: 16px; }
+  .empty-text { font-family: 'Share Tech Mono', monospace; font-size: 13px; letter-spacing: 3px; color: var(--text-dim); text-transform: uppercase; }
+
+  /* LOADING */
+  .loader-wrap { display: flex; justify-content: center; padding: 60px; }
+  .loader { width: 40px; height: 40px; border: 2px solid rgba(155,48,255,0.2); border-top-color: var(--purple-neon); border-radius: 50%; animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  footer { text-align: center; padding: 40px; border-top: 1px solid rgba(75,0,130,0.1); font-family: 'Share Tech Mono', monospace; font-size: 10px; letter-spacing: 3px; color: var(--text-dim); text-transform: uppercase; }
+  footer a { color: var(--purple-neon); text-decoration: none; }
+
+  @keyframes fadeInUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+  .fade-in { animation: fadeInUp 0.5s ease backwards; }
+
+  @media (max-width: 900px) {
+    nav { padding: 18px 24px; }
+    .nav-links { display: none; }
+    .page-hero, .main { padding-left: 24px; padding-right: 24px; }
+    .wipe-card-header { padding: 24px 24px 20px; }
+    .wipe-info-block { padding: 20px 24px; }
+    .wipe-info-grid { grid-template-columns: 1fr; }
+    .wipe-info-block:nth-child(odd) { border-right: none; }
+    .archive-body-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursor-ring"></div>
+
+<nav>
+  <a href="/" class="nav-logo">
+    <span class="nav-logo-text">WF</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="/#about">About Us</a></li>
+    <li><a href="/#recruitment">Recruitment</a></li>
+    <li><a href="/#contacts">Contacts</a></li>
+    <li><a href="/roster/">Roster</a></li>
+    <li><a href="/wipe/" class="active">Wipe</a></li>
+    <li><a href="/hub/" class="nav-hub">WF HUB</a></li>
+  </ul>
+  <span id="nav-auth"></span>
+  <a href="/#recruitment" class="nav-cta">Apply Now</a>
+</nav>
+
+<!-- HERO -->
+<section class="page-hero">
+  <p class="page-hero-label">// WF CLAN — CURRENT WIPE</p>
+  <h1 class="page-hero-title">WIPE INFO</h1>
+  <div id="wipe-status-badge" class="status-badge no-wipe" style="display:none;"></div>
+  <div class="hero-line"></div>
+</section>
+
+<div class="main">
+  <!-- CURRENT WIPE -->
+  <div id="wipe-container">
+    <div class="loader-wrap"><div class="loader"></div></div>
+  </div>
+
+  <!-- ARCHIVE -->
+  <div id="archive-section" style="display:none;">
+    <div class="section-title">Archive <span id="archive-count"></span></div>
+    <div class="archive-list" id="archive-list"></div>
+  </div>
+</div>
+
+<footer>
+  <a href="/">← Main</a> &nbsp;·&nbsp; <a href="/roster/">Roster</a> &nbsp;·&nbsp; WF CLAN · WIPE INFO
+</footer>
+
+<script>
+// ── CURSOR ────────────────────────────────────────────────────
+const cursor = document.getElementById('cursor');
+const ring   = document.getElementById('cursor-ring');
+let mx = 0, my = 0, rx = 0, ry = 0;
+document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+(function animCursor() {
+  cursor.style.transform = `translate(${mx - 4}px, ${my - 4}px)`;
+  rx += (mx - rx) * 0.15; ry += (my - ry) * 0.15;
+  ring.style.transform = `translate(${rx - 16}px, ${ry - 16}px)`;
+  requestAnimationFrame(animCursor);
+})();
+
+// ── HELPERS ──────────────────────────────────────────────────
+const SPEC_LABEL = { raider: 'Raider', pvp: 'PVP / Coller', builder: 'Builder / Elec', farmer: 'Farmer / Support', any: 'Any' };
+const RANK_LABEL = { leader: 'Leader', 'co-leader': 'Co-Leader', veteran: 'Veteran', member: 'Member', recruit: 'Recruit' };
+
+function fmtDate(iso) {
+  if (!iso) return '—';
+  return new Date(iso).toLocaleString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Moscow' }) + ' МСК';
+}
+function fmtDateShort(iso) {
+  if (!iso) return '—';
+  return new Date(iso).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+// ── COUNTDOWN ────────────────────────────────────────────────
+let countdownInterval = null;
+function startCountdown(iso) {
+  const target = new Date(iso).getTime();
+  const cdEl = document.getElementById('countdown-box');
+  if (!cdEl) return;
+
+  function tick() {
+    const now = Date.now();
+    const diff = target - now;
+    if (diff <= 0) {
+      cdEl.innerHTML = '<span style="font-family:\'Share Tech Mono\',monospace;font-size:14px;color:var(--green);letter-spacing:2px;">WIPE STARTED</span>';
+      clearInterval(countdownInterval);
+      return;
+    }
+    const d = Math.floor(diff / 86400000);
+    const h = Math.floor((diff % 86400000) / 3600000);
+    const m = Math.floor((diff % 3600000) / 60000);
+    const s = Math.floor((diff % 60000) / 1000);
+    const pad = n => String(n).padStart(2, '0');
+    cdEl.innerHTML = `
+      ${d > 0 ? `<div class="cd-block"><div class="cd-num">${d}</div><div class="cd-unit">days</div></div><div class="cd-sep">:</div>` : ''}
+      <div class="cd-block"><div class="cd-num">${pad(h)}</div><div class="cd-unit">hours</div></div>
+      <div class="cd-sep">:</div>
+      <div class="cd-block"><div class="cd-num">${pad(m)}</div><div class="cd-unit">min</div></div>
+      <div class="cd-sep">:</div>
+      <div class="cd-block"><div class="cd-num">${pad(s)}</div><div class="cd-unit">sec</div></div>`;
+  }
+  tick();
+  countdownInterval = setInterval(tick, 1000);
+}
+
+// ── COPY CONNECT ─────────────────────────────────────────────
+function copyConnect(cmd) {
+  navigator.clipboard.writeText(cmd).then(() => {
+    const btn = document.getElementById('copy-btn');
+    if (btn) { btn.textContent = '✓ COPIED'; btn.classList.add('copied'); setTimeout(() => { btn.textContent = 'COPY'; btn.classList.remove('copied'); }, 2000); }
+  });
+}
+
+// ── SQUAD CARD ───────────────────────────────────────────────
+function squadCard(m) {
+  const initials = m.nickname.slice(0, 2).toUpperCase();
+  const avatarInner = m.avatar_url
+    ? `<img src="${m.avatar_url}" alt="${m.nickname}" onerror="this.outerHTML='${initials}'">`
+    : initials;
+  const specClass = 'spec-' + m.specialization;
+  return `
+    <div class="squad-card">
+      <div class="squad-avatar">${avatarInner}</div>
+      <div class="squad-info">
+        <div class="squad-nick">${m.nickname}</div>
+        <div class="squad-spec ${specClass}">${SPEC_LABEL[m.specialization] || m.specialization}</div>
+      </div>
+    </div>`;
+}
+
+// ── RENDER CURRENT WIPE ──────────────────────────────────────
+function renderCurrentWipe(wipe) {
+  const badge = document.getElementById('wipe-status-badge');
+  badge.style.display = 'inline-flex';
+  badge.className = 'status-badge active';
+  badge.textContent = 'WIPE ACTIVE';
+
+  const squadHtml = wipe.squad.length
+    ? wipe.squad.map(m => squadCard(m)).join('')
+    : '<p style="font-family:\'Share Tech Mono\',monospace;font-size:11px;color:var(--text-dim);letter-spacing:2px;">Состав не указан</p>';
+
+  const descBlock = wipe.description ? `
+    <div class="wipe-info-block" style="grid-column:1/-1">
+      <div class="info-label">Заметки</div>
+      <div class="desc-text">${wipe.description}</div>
+    </div>` : '';
+
+  const raidBlock = wipe.raid_plan ? `
+    <div class="wipe-info-block">
+      <div class="info-label">Расписание рейдов</div>
+      <div class="raid-plan-text">${wipe.raid_plan}</div>
+    </div>` : '';
+
+  document.getElementById('wipe-container').innerHTML = `
+    <div class="wipe-card fade-in">
+      <div class="wipe-card-header">
+        <div class="wipe-title">${wipe.title}</div>
+        <div class="countdown-wrap">
+          <div class="countdown-label">До вайпа</div>
+          <div class="countdown" id="countdown-box"></div>
+        </div>
+      </div>
+
+      <div class="wipe-info-grid">
+        <div class="wipe-info-block">
+          <div class="info-label">Сервер</div>
+          <div class="server-name">${wipe.server_name}</div>
+        </div>
+        <div class="wipe-info-block">
+          <div class="info-label">Дата вайпа</div>
+          <div class="wipe-date-str">${fmtDate(wipe.wipe_date)}</div>
+        </div>
+        <div class="wipe-info-block" style="grid-column:1/-1">
+          <div class="info-label">Подключение к серверу</div>
+          <div class="connect-box">
+            <div class="connect-cmd">${wipe.connect}</div>
+            <button class="copy-btn" id="copy-btn" onclick="copyConnect('${wipe.connect.replace(/'/g, "\\'")}')">COPY</button>
+          </div>
+        </div>
+        ${raidBlock}
+        ${descBlock}
+      </div>
+    </div>
+
+    <div class="section-title" style="margin-top:0;">
+      Squad <span>${wipe.squad.length} players</span>
+    </div>
+    <div class="squad-grid fade-in" style="animation-delay:0.15s">
+      ${squadHtml}
+    </div>`;
+
+  startCountdown(wipe.wipe_date);
+}
+
+// ── RENDER NO WIPE ───────────────────────────────────────────
+function renderNoWipe() {
+  const badge = document.getElementById('wipe-status-badge');
+  badge.style.display = 'inline-flex';
+  badge.className = 'status-badge no-wipe';
+  badge.textContent = 'NO ACTIVE WIPE';
+
+  document.getElementById('wipe-container').innerHTML = `
+    <div class="empty-wipe fade-in">
+      <div class="empty-icon">🔥</div>
+      <div class="empty-text">Активного вайпа нет<br>Следи за обновлениями</div>
+    </div>`;
+}
+
+// ── RENDER ARCHIVE ───────────────────────────────────────────
+function renderArchive(wipes) {
+  if (!wipes.length) return;
+  const section = document.getElementById('archive-section');
+  section.style.display = 'block';
+  document.getElementById('archive-count').textContent = `(${wipes.length})`;
+
+  const list = document.getElementById('archive-list');
+  list.innerHTML = wipes.map((w, i) => {
+    const squadChips = w.squad.length
+      ? w.squad.map(m => `<span class="archive-squad-chip">${m.nickname}</span>`).join('')
+      : '<span style="font-size:11px;color:var(--text-dim);">—</span>';
+
+    const raidRow = w.raid_plan ? `
+      <div>
+        <div class="archive-field-label">Расписание</div>
+        <div class="archive-field-value">${w.raid_plan}</div>
+      </div>` : '';
+
+    return `
+      <div class="archive-item" id="arc-${i}">
+        <div class="archive-header" onclick="toggleArc(${i})">
+          <span class="archive-num">#${wipes.length - i}</span>
+          <span class="archive-title">${w.title}</span>
+          <span class="archive-date">${fmtDateShort(w.wipe_date)}</span>
+          <span class="archive-arrow">▶</span>
+        </div>
+        <div class="archive-body">
+          <div class="archive-body-grid">
+            <div>
+              <div class="archive-field-label">Сервер</div>
+              <div class="archive-field-value">${w.server_name}</div>
+            </div>
+            <div>
+              <div class="archive-field-label">Дата вайпа</div>
+              <div class="archive-field-value">${fmtDateShort(w.wipe_date)}</div>
+            </div>
+            <div>
+              <div class="archive-field-label">Коннект</div>
+              <div class="archive-field-value green">${w.connect}</div>
+            </div>
+            ${raidRow}
+          </div>
+          <div style="margin-top:12px;">
+            <div class="archive-field-label">Состав</div>
+            <div class="archive-squad-mini">${squadChips}</div>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function toggleArc(i) {
+  const el = document.getElementById('arc-' + i);
+  el.classList.toggle('open');
+}
+
+// ── LOAD DATA ────────────────────────────────────────────────
+async function loadWipe() {
+  try {
+    const [curRes, arcRes] = await Promise.all([
+      fetch('/api/wipe/current/'),
+      fetch('/api/wipe/archive/'),
+    ]);
+    const cur = await curRes.json();
+    const arc = await arcRes.json();
+
+    if (cur.ok && cur.wipe) {
+      renderCurrentWipe(cur.wipe);
+    } else {
+      renderNoWipe();
+    }
+    renderArchive(arc);
+  } catch(e) {
+    document.getElementById('wipe-container').innerHTML = `
+      <div class="empty-wipe">
+        <div class="empty-icon">⚠️</div>
+        <div class="empty-text">Ошибка загрузки</div>
+      </div>`;
+  }
+}
+
+loadWipe();
+
+// ── AUTH NAV ─────────────────────────────────────────────
+(function(){
+  const token    = localStorage.getItem('wf_token');
+  const username = localStorage.getItem('wf_username');
+  const el = document.getElementById('nav-auth');
+  if(!el) return;
+  if(token && username){
+    el.innerHTML = `<span style="font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:2px;color:var(--purple-bright);border:1px solid rgba(155,48,255,.35);padding:10px 18px;">▶ ${username.toUpperCase()}</span>
+      <button onclick="localStorage.removeItem('wf_token');localStorage.removeItem('wf_username');location.reload();" style="font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:2px;color:var(--text-dim);background:none;border:1px solid rgba(155,48,255,.15);padding:10px 14px;cursor:pointer;transition:color .2s;" onmouseenter="this.style.color='#ff3355'" onmouseleave="this.style.color='var(--text-dim)'">ВЫЙТИ</button>`;
+  } else {
+    el.innerHTML = '<a href="/auth/" class="nav-login">ВОЙТИ</a>';
+  }
+})();
+</script>
+</body>
+</html>

@@ -72,8 +72,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # CORS — разрешаем все источники в режиме DEBUG
 CORS_ALLOW_ALL_ORIGINS = DEBUG
 
-# Discord webhook для уведомлений о новых заявках
-DISCORD_WEBHOOK_URL = 'https://discord.com/api/webhooks/1478693170542936184/SFQlxMJii2cG52Eh3rfhb-xNAf3XB_f4hl9koAXFWvzdkW7qsPWD5vjW3Q3Qlotn6KUz'
+# Discord webhooks
+DISCORD_WEBHOOK_URL        = 'https://discord.com/api/webhooks/1478693170542936184/SFQlxMJii2cG52Eh3rfhb-xNAf3XB_f4hl9koAXFWvzdkW7qsPWD5vjW3Q3Qlotn6KUz'  # заявки
+DISCORD_CLAN_WEBHOOK_URL   = 'https://discord.com/api/webhooks/1478885072592437279/4W7AGtOImnnzbisvP0oJ66iSt7zcmtz0Uy6pCdX8m8cP67rsvIpQiRyofgODW-qt4zq3'  # вайпы + регистрации
+DISCORD_ROSTER_WEBHOOK_URL = 'https://discord.com/api/webhooks/1478887988850327713/XDEFpiavVScpUuHI6fKtoFnOvBCJjhJwLJ5CxvRdinmLbAeM49SuPd8NQdEWnE8zK5dh'  # состав клана
 
 REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': [

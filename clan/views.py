@@ -1,6 +1,7 @@
 import urllib.request
 import urllib.error
 import json
+import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
 
 from django.conf import settings
@@ -10,8 +11,28 @@ from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
-from .models import Application
+from .models import Application, Member, WipePost, UserProfile
 from .serializers import ApplicationSerializer
+
+
+def fetch_steam_name(steam_url: str) -> str:
+    """Возвращает Steam-ник из публичного профиля через Community XML API."""
+    url = steam_url.strip().rstrip('/')
+    if not url:
+        return ''
+    # Принимаем: steamcommunity.com/id/xxx  или  steamcommunity.com/profiles/76561...
+    # Или просто короткий ID/никнейм — оборачиваем в /id/
+    if not url.startswith('http'):
+        url = 'https://steamcommunity.com/id/' + url
+    xml_url = url + '/?xml=1'
+    try:
+        req = urllib.request.Request(xml_url, headers={'User-Agent': 'Mozilla/5.0'})
+        with urllib.request.urlopen(req, timeout=5) as resp:
+            tree = ET.fromstring(resp.read())
+            name = tree.findtext('steamID')
+            return (name or '').strip()
+    except Exception:
+        return ''
 
 
 def send_discord_webhook(application):
@@ -55,6 +76,186 @@ def send_discord_webhook(application):
         urllib.request.urlopen(req, timeout=5)
     except urllib.error.URLError:
         pass  # не блокируем API если Discord недоступен
+
+def _post_to_discord(webhook_key: str, payload: dict):
+    """Отправляет payload в Discord webhook. webhook_key — имя ключа в settings."""
+    url = getattr(settings, webhook_key, None)
+    if not url:
+        return
+    data = json.dumps(payload).encode('utf-8')
+    req = urllib.request.Request(url, data=data, headers={
+        'Content-Type': 'application/json',
+        'User-Agent': 'DiscordBot (WF-Clan, 1.0)',
+    }, method='POST')
+    try:
+        urllib.request.urlopen(req, timeout=5)
+    except urllib.error.URLError:
+        pass
+
+
+def send_wipe_webhook(wipe, old_message_id: str = '') -> str:
+    """Постит вайп в Discord. Если old_message_id передан — сначала удаляет старое сообщение.
+    Возвращает ID нового сообщения (или '' при ошибке)."""
+    url = getattr(settings, 'DISCORD_CLAN_WEBHOOK_URL', None)
+    if not url:
+        return ''
+
+    # Удаляем предыдущее сообщение вайпа
+    if old_message_id:
+        delete_url = url + f'/messages/{old_message_id}'
+        req = urllib.request.Request(delete_url, method='DELETE', headers={
+            'User-Agent': 'DiscordBot (WF-Clan, 1.0)',
+        })
+        try:
+            urllib.request.urlopen(req, timeout=5)
+        except urllib.error.URLError:
+            pass
+
+    squad_names = ', '.join(
+        m.display_name() for m in wipe.squad.filter(is_active=True)[:20]
+    ) or '—'
+    wipe_dt = wipe.wipe_date.strftime('%d.%m.%Y %H:%M МСК') if wipe.wipe_date else '—'
+
+    fields = [
+        {"name": "🖥️ Сервер",     "value": wipe.server_name,      "inline": True},
+        {"name": "📅 Дата вайпа",  "value": wipe_dt,               "inline": True},
+        {"name": "🔌 Коннект",     "value": f"`{wipe.connect}`",   "inline": False},
+        {"name": "⚔️ Рейд",        "value": wipe.raid_plan or '—', "inline": False},
+        {"name": "👥 Состав",      "value": squad_names,           "inline": False},
+    ]
+    if wipe.description:
+        fields.append({"name": "📝 Описание", "value": wipe.description[:1024], "inline": False})
+
+    payload = {
+        "embeds": [{
+            "title": f"🗺️ {wipe.title}",
+            "color": 0x9B30FF,
+            "fields": fields,
+            "footer": {"text": f"WF Clan • Вайп #{wipe.id}"},
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+        }]
+    }
+
+    # ?wait=true — Discord вернёт JSON с id сообщения
+    data = json.dumps(payload).encode('utf-8')
+    req = urllib.request.Request(url + '?wait=true', data=data, headers={
+        'Content-Type': 'application/json',
+        'User-Agent': 'DiscordBot (WF-Clan, 1.0)',
+    }, method='POST')
+    try:
+        with urllib.request.urlopen(req, timeout=5) as resp:
+            result = json.loads(resp.read())
+            return result.get('id', '')
+    except urllib.error.URLError:
+        return ''
+
+
+def send_roster_webhook() -> str:
+    """Постит актуальный состав клана в Discord. Возвращает ID нового сообщения."""
+    from .models import Member, DiscordMessage
+
+    url = getattr(settings, 'DISCORD_ROSTER_WEBHOOK_URL', None)
+    if not url:
+        return ''
+
+    # Удаляем предыдущее сообщение ростера
+    record, _ = DiscordMessage.objects.get_or_create(key='roster')
+    if record.message_id:
+        delete_url = url + f'/messages/{record.message_id}'
+        req = urllib.request.Request(delete_url, method='DELETE', headers={
+            'User-Agent': 'DiscordBot (WF-Clan, 1.0)',
+        })
+        try:
+            urllib.request.urlopen(req, timeout=5)
+        except urllib.error.URLError:
+            pass
+
+    rank_icon = {
+        'leader':    '👑',
+        'co-leader': '🥈',
+        'veteran':   '⭐',
+        'member':    '🔹',
+        'recruit':   '🔸',
+    }
+    spec_icon = {
+        'raider':  '💣',
+        'builder': '🔧',
+        'pvp':     '⚔️',
+        'farmer':  '⛏️',
+        'any':     '❓',
+    }
+
+    members = Member.objects.filter(is_active=True).select_related('user', 'user__profile').order_by('order', 'nickname')
+    total = members.count()
+
+    # Группируем по рангу для красивого вывода
+    groups = {}
+    rank_order = ['leader', 'co-leader', 'veteran', 'member', 'recruit']
+    for m in members:
+        groups.setdefault(m.rank, []).append(m)
+
+    fields = []
+    for rank in rank_order:
+        if rank not in groups:
+            continue
+        lines = []
+        for m in groups[rank]:
+            icon = spec_icon.get(m.specialization, '❓')
+            hours_str = f' · {m.hours}ч' if m.hours else ''
+            lines.append(f'{icon} **{m.display_name()}**{hours_str}')
+        fields.append({
+            "name": f"{rank_icon.get(rank, '')} {rank.upper()} ({len(groups[rank])})",
+            "value": '\n'.join(lines) or '—',
+            "inline": True,
+        })
+
+    payload = {
+        "embeds": [{
+            "title": f"👥 Состав клана WF — {total} игроков",
+            "color": 0x9B30FF,
+            "fields": fields,
+            "footer": {"text": "WF Clan • Состав обновлён"},
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+        }]
+    }
+
+    data = json.dumps(payload).encode('utf-8')
+    req = urllib.request.Request(url + '?wait=true', data=data, headers={
+        'Content-Type': 'application/json',
+        'User-Agent': 'DiscordBot (WF-Clan, 1.0)',
+    }, method='POST')
+    try:
+        with urllib.request.urlopen(req, timeout=5) as resp:
+            result = json.loads(resp.read())
+            new_id = result.get('id', '')
+            record.message_id = new_id
+            record.save()
+            return new_id
+    except urllib.error.URLError:
+        return ''
+
+
+def send_register_webhook(username: str, steam_name: str, role: str, hours: int):
+    """Уведомление о новой регистрации."""
+    role_labels = {
+        'raider': 'Raider', 'builder': 'Builder / Electrician',
+        'pvp': 'PVP / Coller', 'farmer': 'Farmer / Support', 'any': 'Any',
+    }
+    payload = {
+        "embeds": [{
+            "title": "👤 Новый игрок зарегистрировался",
+            "color": 0x00AAFF,
+            "fields": [
+                {"name": "Аккаунт",     "value": username,                         "inline": True},
+                {"name": "Steam",       "value": steam_name or '—',                "inline": True},
+                {"name": "Роль",        "value": role_labels.get(role, role),       "inline": True},
+                {"name": "Часов в Rust","value": str(hours) if hours else '—',     "inline": True},
+            ],
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+        }]
+    }
+    _post_to_discord('DISCORD_CLAN_WEBHOOK_URL', payload)
+
 
 # ── СТАТИЧНЫЕ ДАННЫЕ (можно вынести в БД позже) ──────────────
 
@@ -115,6 +316,63 @@ def videos(request):
     return Response(VIDEOS)
 
 
+@api_view(['GET'])
+def roster(request):
+    qs = Member.objects.filter(is_active=True).select_related('user', 'user__profile')
+    data = []
+    for m in qs:
+        data.append({
+            'id':             m.id,
+            'nickname':       m.display_name(),
+            'rank':           m.rank,
+            'specialization': m.specialization,
+            'region':         m.region,
+            'hours':          m.hours,
+            'avatar_url':     m.avatar_url,
+            'discord_tag':    m.discord_tag,
+            'join_date':      m.join_date,
+        })
+    return Response(data)
+
+
+def _serialize_wipe(wipe):
+    squad = []
+    for m in wipe.squad.filter(is_active=True).select_related('user', 'user__profile'):
+        squad.append({
+            'id':             m.id,
+            'nickname':       m.display_name(),
+            'rank':           m.rank,
+            'specialization': m.specialization,
+            'avatar_url':     m.avatar_url,
+        })
+    return {
+        'id':          wipe.id,
+        'title':       wipe.title,
+        'server_name': wipe.server_name,
+        'connect':     wipe.connect,
+        'wipe_date':   wipe.wipe_date.isoformat() if wipe.wipe_date else None,
+        'raid_plan':   wipe.raid_plan,
+        'description': wipe.description,
+        'is_active':   wipe.is_active,
+        'created_at':  wipe.created_at.isoformat(),
+        'squad':       squad,
+    }
+
+
+@api_view(['GET'])
+def wipe_current(request):
+    wipe = WipePost.objects.filter(is_active=True).prefetch_related('squad').first()
+    if not wipe:
+        return Response({'ok': False, 'wipe': None})
+    return Response({'ok': True, 'wipe': _serialize_wipe(wipe)})
+
+
+@api_view(['GET'])
+def wipe_archive(request):
+    wipes = WipePost.objects.filter(is_active=False).prefetch_related('squad')[:10]
+    return Response([_serialize_wipe(w) for w in wipes])
+
+
 @api_view(['POST'])
 def apply(request):
     serializer = ApplicationSerializer(data=request.data)
@@ -130,9 +388,12 @@ def apply(request):
 
 @api_view(['POST'])
 def register(request):
-    username = request.data.get('username', '').strip()
-    email    = request.data.get('email', '').strip()
-    password = request.data.get('password', '')
+    username   = request.data.get('username', '').strip()
+    email      = request.data.get('email', '').strip()
+    password   = request.data.get('password', '')
+    steam_url  = request.data.get('steam_url', '').strip()
+    role       = request.data.get('role', 'any')
+    hours      = int(request.data.get('hours', 0) or 0)
 
     if len(username) < 3:
         return Response({"ok": False, "error": "Никнейм должен содержать минимум 3 символа"}, status=400)
@@ -145,12 +406,54 @@ def register(request):
     if User.objects.filter(email=email).exists():
         return Response({"ok": False, "error": "Email уже используется"}, status=400)
 
+    # Получаем Steam-ник (если указан URL)
+    steam_name = ''
+    if steam_url:
+        steam_name = fetch_steam_name(steam_url)
+
+    valid_roles = {'raider', 'builder', 'pvp', 'farmer', 'any'}
+    if role not in valid_roles:
+        role = 'any'
+
     user = User.objects.create_user(username=username, email=email, password=password)
+    UserProfile.objects.create(user=user, steam_name=steam_name, steam_url=steam_url, role=role, hours=hours)
     token, _ = Token.objects.get_or_create(user=user)
+    send_register_webhook(username, steam_name, role, hours)
     return Response(
-        {"ok": True, "message": "Аккаунт создан!", "token": token.key, "username": user.username},
+        {"ok": True, "message": "Аккаунт создан!", "token": token.key,
+         "username": user.username, "steam_name": steam_name},
         status=status.HTTP_201_CREATED,
     )
+
+
+@api_view(['GET'])
+def user_info(request):
+    """Возвращает профиль юзера для автозаполнения в MemberAdmin."""
+    user_id = request.query_params.get('user_id', '').strip()
+    if not user_id:
+        return Response({'ok': False}, status=400)
+    try:
+        profile = UserProfile.objects.select_related('user').get(user_id=user_id)
+        return Response({
+            'ok':         True,
+            'steam_name': profile.steam_name,
+            'role':       profile.role,
+            'hours':      profile.hours,
+        })
+    except UserProfile.DoesNotExist:
+        return Response({'ok': False, 'error': 'Профиль не найден'}, status=404)
+
+
+@api_view(['GET'])
+def steam_lookup(request):
+    """Возвращает Steam-ник по URL профиля (без регистрации)."""
+    url = request.query_params.get('url', '').strip()
+    if not url:
+        return Response({'ok': False, 'error': 'URL не указан'}, status=400)
+    name = fetch_steam_name(url)
+    if not name:
+        return Response({'ok': False, 'error': 'Профиль не найден или закрыт'}, status=404)
+    return Response({'ok': True, 'steam_name': name})
 
 
 @api_view(['POST'])

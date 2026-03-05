@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WF | Roster</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --void: #020005;
+    --obsidian: #0a0010;
+    --deep: #0d0018;
+    --purple-core: #4B0082;
+    --purple-glow: #6a00b8;
+    --purple-neon: #9b30ff;
+    --purple-bright: #bf5fff;
+    --purple-mist: rgba(75,0,130,0.15);
+    --ember: #ff4500;
+    --steel: #1a1a2e;
+    --rust-orange: #c84b11;
+    --text-primary: #e8ddf5;
+    --text-dim: #7a6d8a;
+    --glass-bg: rgba(15, 0, 25, 0.6);
+    --glass-border: rgba(155, 48, 255, 0.2);
+  }
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--void);
+    color: var(--text-primary);
+    font-family: 'Rajdhani', sans-serif;
+    overflow-x: hidden;
+    cursor: none;
+    min-height: 100vh;
+  }
+
+  /* CURSOR */
+  .cursor {
+    position: fixed; width: 8px; height: 8px;
+    background: var(--purple-neon); border-radius: 50%;
+    pointer-events: none; z-index: 9999; transition: transform 0.1s;
+    box-shadow: 0 0 10px var(--purple-neon), 0 0 20px var(--purple-core);
+  }
+  .cursor-ring {
+    position: fixed; width: 32px; height: 32px;
+    border: 1px solid rgba(155,48,255,0.5); border-radius: 50%;
+    pointer-events: none; z-index: 9998;
+    transition: transform 0.15s ease, width 0.2s, height 0.2s;
+    transform: translate(-12px, -12px);
+  }
+
+  /* NOISE */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 9997; opacity: 0.4;
+  }
+
+  /* ─── NAV ─────────────────────────────────────────────── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    padding: 22px 60px;
+    display: flex; align-items: center; justify-content: space-between;
+    background: linear-gradient(180deg, rgba(2,0,5,0.95) 0%, transparent 100%);
+    border-bottom: 1px solid rgba(75,0,130,0.15);
+    backdrop-filter: blur(4px);
+  }
+  .nav-logo { display: flex; align-items: center; text-decoration: none; }
+  .nav-logo-text {
+    font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 4px;
+    color: var(--text-primary); text-decoration: none;
+    text-shadow: 0 0 20px var(--purple-neon), 0 0 40px var(--purple-core);
+  }
+  .nav-links { display: flex; gap: 48px; list-style: none; }
+  .nav-links a {
+    font-family: 'Share Tech Mono', monospace; font-size: 11px;
+    letter-spacing: 3px; text-transform: uppercase; color: var(--text-dim);
+    text-decoration: none; transition: color 0.3s, text-shadow 0.3s; position: relative;
+  }
+  .nav-links a::after {
+    content: ''; position: absolute; bottom: -4px; left: 0; right: 0;
+    height: 1px; background: var(--purple-neon);
+    transform: scaleX(0); transition: transform 0.3s;
+    box-shadow: 0 0 8px var(--purple-neon);
+  }
+  .nav-links a:hover { color: var(--purple-bright); text-shadow: 0 0 12px var(--purple-neon); }
+  .nav-links a:hover::after { transform: scaleX(1); }
+  .nav-links a.active { color: var(--purple-neon); }
+  .nav-links a.active::after { transform: scaleX(1); }
+  .nav-hub { color: var(--purple-neon) !important; font-weight: 600; }
+  .nav-login {
+    font-family: 'Share Tech Mono', monospace; font-size: 11px; letter-spacing: 3px;
+    text-transform: uppercase; color: var(--text-dim); text-decoration: none;
+    border: 1px solid rgba(155,48,255,.25); padding: 10px 18px;
+    clip-path: polygon(8px 0%,100% 0%,calc(100% - 8px) 100%,0% 100%); transition: all .3s;
+  }
+  .nav-login:hover { color: var(--purple-bright); border-color: var(--purple-neon); }
+  .nav-cta {
+    font-family: 'Share Tech Mono', monospace; font-size: 11px; letter-spacing: 3px;
+    text-transform: uppercase; color: var(--purple-neon); border: 1px solid var(--purple-core);
+    padding: 10px 24px; text-decoration: none; transition: all 0.3s;
+    clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+    background: rgba(75,0,130,0.1);
+  }
+  .nav-cta:hover { background: var(--purple-core); color: #fff; box-shadow: 0 0 30px rgba(75,0,130,0.8); }
+
+  /* ─── HERO ─────────────────────────────────────────────── */
+  .page-hero {
+    position: relative; padding: 160px 60px 80px;
+    text-align: center; overflow: hidden;
+  }
+  .page-hero::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(75,0,130,0.25) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .page-hero-label {
+    font-family: 'Share Tech Mono', monospace; font-size: 11px;
+    letter-spacing: 6px; color: var(--purple-neon); text-transform: uppercase;
+    margin-bottom: 16px; opacity: 0.8;
+  }
+  .page-hero-title {
+    font-family: 'Bebas Neue', sans-serif; font-size: clamp(64px, 10vw, 120px);
+    letter-spacing: 12px; line-height: 1;
+    background: linear-gradient(135deg, #fff 0%, var(--purple-bright) 50%, var(--purple-neon) 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    text-shadow: none; filter: drop-shadow(0 0 40px rgba(155,48,255,0.5));
+    margin-bottom: 20px;
+  }
+  .page-hero-sub {
+    font-family: 'Share Tech Mono', monospace; font-size: 13px; letter-spacing: 2px;
+    color: var(--text-dim); max-width: 500px; margin: 0 auto;
+  }
+  .hero-line {
+    width: 120px; height: 1px; margin: 28px auto 0;
+    background: linear-gradient(90deg, transparent, var(--purple-neon), transparent);
+    box-shadow: 0 0 12px var(--purple-neon);
+  }
+
+  /* ─── FILTERS ───────────────────────────────────────────── */
+  .filters {
+    display: flex; gap: 12px; justify-content: center;
+    flex-wrap: wrap; padding: 0 60px 60px;
+  }
+  .filter-btn {
+    font-family: 'Share Tech Mono', monospace; font-size: 11px;
+    letter-spacing: 2px; text-transform: uppercase; cursor: pointer;
+    padding: 8px 20px; border: 1px solid rgba(155,48,255,0.2);
+    background: transparent; color: var(--text-dim);
+    transition: all 0.25s; clip-path: polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%);
+  }
+  .filter-btn:hover { color: var(--purple-bright); border-color: rgba(155,48,255,0.5); }
+  .filter-btn.active {
+    background: rgba(75,0,130,0.3); color: var(--purple-neon);
+    border-color: var(--purple-neon); box-shadow: 0 0 16px rgba(155,48,255,0.2);
+  }
+
+  /* ─── ROSTER GRID ───────────────────────────────────────── */
+  .roster-section { padding: 0 60px 100px; }
+
+  .roster-stats {
+    display: flex; gap: 32px; justify-content: center; margin-bottom: 52px;
+    flex-wrap: wrap;
+  }
+  .roster-stat {
+    font-family: 'Share Tech Mono', monospace; font-size: 11px;
+    letter-spacing: 2px; color: var(--text-dim);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .roster-stat span { color: var(--purple-neon); font-size: 14px; font-weight: 600; }
+
+  .members-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px; max-width: 1300px; margin: 0 auto;
+  }
+
+  /* MEMBER CARD */
+  .member-card {
+    position: relative; overflow: hidden;
+    background: var(--glass-bg); border: 1px solid var(--glass-border);
+    backdrop-filter: blur(12px);
+    clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px));
+    transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
+    cursor: pointer;
+  }
+  .member-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(155,48,255,0.5);
+    box-shadow: 0 8px 40px rgba(75,0,130,0.3), 0 0 1px rgba(155,48,255,0.5);
+  }
+  .member-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--purple-neon), transparent);
+    opacity: 0; transition: opacity 0.3s;
+  }
+  .member-card:hover::before { opacity: 1; }
+
+  /* RANK ACCENT (left border color by rank) */
+  .member-card::after {
+    content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+  }
+  .member-card[data-rank="leader"]::after    { background: linear-gradient(180deg, #ffd700, #ffaa00); box-shadow: 0 0 12px #ffd700; }
+  .member-card[data-rank="co-leader"]::after { background: linear-gradient(180deg, #c0c0c0, #888);    box-shadow: 0 0 12px #c0c0c0; }
+  .member-card[data-rank="veteran"]::after   { background: linear-gradient(180deg, var(--purple-neon), var(--purple-core)); box-shadow: 0 0 12px var(--purple-neon); }
+  .member-card[data-rank="member"]::after    { background: linear-gradient(180deg, #4477cc, #224499); }
+  .member-card[data-rank="recruit"]::after   { background: linear-gradient(180deg, #445544, #223322); }
+
+  .card-header {
+    display: flex; align-items: center; gap: 16px;
+    padding: 20px 20px 16px 24px;
+    border-bottom: 1px solid rgba(155,48,255,0.08);
+  }
+  .card-avatar {
+    width: 56px; height: 56px; border-radius: 50%; flex-shrink: 0;
+    border: 2px solid rgba(155,48,255,0.3); object-fit: cover;
+    background: var(--deep);
+    box-shadow: 0 0 16px rgba(75,0,130,0.4);
+  }
+  .card-avatar-placeholder {
+    width: 56px; height: 56px; border-radius: 50%; flex-shrink: 0;
+    border: 2px solid rgba(155,48,255,0.3);
+    background: linear-gradient(135deg, var(--purple-core), var(--obsidian));
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Bebas Neue', sans-serif; font-size: 22px;
+    color: var(--purple-bright);
+    box-shadow: 0 0 16px rgba(75,0,130,0.4);
+  }
+  .card-info { flex: 1; min-width: 0; }
+  .card-nickname {
+    font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 2px;
+    color: var(--text-primary); line-height: 1.1;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .card-rank {
+    font-family: 'Share Tech Mono', monospace; font-size: 10px;
+    letter-spacing: 2px; text-transform: uppercase; margin-top: 3px;
+  }
+  .rank-leader    { color: #ffd700; text-shadow: 0 0 8px #ffd700; }
+  .rank-co-leader { color: #c0c0c0; text-shadow: 0 0 8px #c0c0c0; }
+  .rank-veteran   { color: var(--purple-bright); text-shadow: 0 0 8px var(--purple-neon); }
+  .rank-member    { color: #6699dd; }
+  .rank-recruit   { color: #668866; }
+
+  .card-body { padding: 16px 20px 20px 24px; }
+  .card-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+  .tag {
+    font-family: 'Share Tech Mono', monospace; font-size: 10px;
+    letter-spacing: 1px; text-transform: uppercase;
+    padding: 3px 10px; border: 1px solid rgba(155,48,255,0.2);
+    color: var(--text-dim);
+    clip-path: polygon(4px 0%, 100% 0%, calc(100% - 4px) 100%, 0% 100%);
+  }
+  .tag-spec { border-color: rgba(155,48,255,0.3); color: var(--purple-bright); background: rgba(75,0,130,0.15); }
+  .tag-region { border-color: rgba(68,119,204,0.3); color: #6699dd; background: rgba(34,68,153,0.1); }
+
+  .card-stats { display: flex; gap: 20px; }
+  .card-stat {
+    display: flex; flex-direction: column; gap: 2px;
+  }
+  .card-stat-label {
+    font-family: 'Share Tech Mono', monospace; font-size: 9px;
+    letter-spacing: 2px; color: var(--text-dim); text-transform: uppercase;
+  }
+  .card-stat-value {
+    font-family: 'Bebas Neue', sans-serif; font-size: 20px;
+    letter-spacing: 1px; color: var(--text-primary); line-height: 1;
+  }
+  .card-stat-value.gold { color: #ffd700; text-shadow: 0 0 8px rgba(255,215,0,0.4); }
+
+  /* EMPTY STATE */
+  .empty-state {
+    text-align: center; padding: 80px 20px; grid-column: 1/-1;
+  }
+  .empty-state-icon { font-size: 48px; margin-bottom: 16px; opacity: 0.4; }
+  .empty-state-text {
+    font-family: 'Share Tech Mono', monospace; font-size: 13px;
+    letter-spacing: 2px; color: var(--text-dim);
+  }
+
+  /* LOADING */
+  .loading-grid { grid-column: 1/-1; display: flex; justify-content: center; padding: 60px; }
+  .loader {
+    width: 40px; height: 40px; border: 2px solid rgba(155,48,255,0.2);
+    border-top-color: var(--purple-neon); border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* FOOTER */
+  footer {
+    text-align: center; padding: 40px;
+    border-top: 1px solid rgba(75,0,130,0.1);
+    font-family: 'Share Tech Mono', monospace; font-size: 10px;
+    letter-spacing: 3px; color: var(--text-dim); text-transform: uppercase;
+  }
+  footer a { color: var(--purple-neon); text-decoration: none; }
+  footer a:hover { text-shadow: 0 0 8px var(--purple-neon); }
+
+  /* FADE IN */
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .member-card { animation: fadeInUp 0.4s ease backwards; }
+
+  /* ─── RESPONSIVE ─────────────────────────────────────────── */
+  @media (max-width: 900px) {
+    nav { padding: 18px 24px; }
+    .nav-links { display: none; }
+    .page-hero { padding: 120px 24px 60px; }
+    .roster-section { padding: 0 24px 80px; }
+    .filters { padding: 0 24px 48px; }
+  }
+  @media (max-width: 600px) {
+    .members-grid { grid-template-columns: 1fr; }
+    .roster-stats { gap: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursor-ring"></div>
+
+<!-- NAV -->
+<nav>
+  <a href="/" class="nav-logo">
+    <span class="nav-logo-text">WF</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="/#about">About Us</a></li>
+    <li><a href="/#recruitment">Recruitment</a></li>
+    <li><a href="/#contacts">Contacts</a></li>
+    <li><a href="/roster/" class="active">Roster</a></li>
+    <li><a href="/wipe/">Wipe</a></li>
+    <li><a href="/hub/" class="nav-hub">WF HUB</a></li>
+  </ul>
+  <span id="nav-auth"></span>
+  <a href="/#recruitment" class="nav-cta">Apply Now</a>
+</nav>
+
+<!-- HERO -->
+<section class="page-hero">
+  <p class="page-hero-label">// WF CLAN — ACTIVE MEMBERS</p>
+  <h1 class="page-hero-title">ROSTER</h1>
+  <p class="page-hero-sub" id="hero-sub">Loading roster data...</p>
+  <div class="hero-line"></div>
+</section>
+
+<!-- FILTERS -->
+<div class="filters" id="filters">
+  <button class="filter-btn active" data-filter="all">All</button>
+  <button class="filter-btn" data-filter="rank:leader">Leader</button>
+  <button class="filter-btn" data-filter="rank:co-leader">Co-Leader</button>
+  <button class="filter-btn" data-filter="rank:veteran">Veteran</button>
+  <button class="filter-btn" data-filter="rank:member">Member</button>
+  <button class="filter-btn" data-filter="rank:recruit">Recruit</button>
+  <button class="filter-btn" data-filter="spec:raider">Raider</button>
+  <button class="filter-btn" data-filter="spec:pvp">PVP</button>
+  <button class="filter-btn" data-filter="spec:builder">Builder</button>
+  <button class="filter-btn" data-filter="spec:farmer">Farmer</button>
+</div>
+
+<!-- ROSTER -->
+<section class="roster-section">
+  <div class="roster-stats" id="roster-stats" style="display:none;">
+    <div class="roster-stat">Total: <span id="stat-total">0</span></div>
+    <div class="roster-stat">Leaders: <span id="stat-leaders">0</span></div>
+    <div class="roster-stat">Veterans: <span id="stat-vets">0</span></div>
+    <div class="roster-stat">Members: <span id="stat-members">0</span></div>
+  </div>
+
+  <div class="members-grid" id="members-grid">
+    <div class="loading-grid"><div class="loader"></div></div>
+  </div>
+</section>
+
+<footer>
+  <a href="/">← Back to Main</a> &nbsp;·&nbsp; WF CLAN &nbsp;·&nbsp; ROSTER
+</footer>
+
+<script>
+  // ── CURSOR ──────────────────────────────────────────────────
+  const cursor = document.getElementById('cursor');
+  const ring   = document.getElementById('cursor-ring');
+  let mx = 0, my = 0, rx = 0, ry = 0;
+  document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+  (function animCursor() {
+    cursor.style.transform = `translate(${mx - 4}px, ${my - 4}px)`;
+    rx += (mx - rx) * 0.15; ry += (my - ry) * 0.15;
+    ring.style.transform = `translate(${rx - 16}px, ${ry - 16}px)`;
+    requestAnimationFrame(animCursor);
+  })();
+
+  // ── DATA ────────────────────────────────────────────────────
+  let allMembers = [];
+  let activeFilter = 'all';
+
+  const RANK_LABEL = {
+    'leader': 'Leader', 'co-leader': 'Co-Leader',
+    'veteran': 'Veteran', 'member': 'Member', 'recruit': 'Recruit'
+  };
+  const SPEC_LABEL = {
+    'raider': 'Raider', 'builder': 'Builder / Elec',
+    'pvp': 'PVP / Coller', 'farmer': 'Farmer / Support', 'any': 'Any'
+  };
+
+  function formatHours(h) {
+    if (h >= 1000) return (h / 1000).toFixed(1) + 'k';
+    return h.toString();
+  }
+
+  function formatDate(d) {
+    if (!d) return '—';
+    const dt = new Date(d);
+    return dt.toLocaleDateString('ru-RU', { year: 'numeric', month: 'short' });
+  }
+
+  function renderCard(m, idx) {
+    const rankClass = 'rank-' + m.rank.replace('-', '-');
+    const initials = m.nickname.slice(0, 2).toUpperCase();
+    const avatarHtml = m.avatar_url
+      ? `<img class="card-avatar" src="${m.avatar_url}" alt="${m.nickname}" onerror="this.outerHTML='<div class=card-avatar-placeholder>${initials}</div>'">`
+      : `<div class="card-avatar-placeholder">${initials}</div>`;
+
+    return `
+      <div class="member-card" data-rank="${m.rank}" data-spec="${m.specialization}" style="animation-delay:${idx * 0.05}s">
+        <div class="card-header">
+          ${avatarHtml}
+          <div class="card-info">
+            <div class="card-nickname">${m.nickname}</div>
+            <div class="card-rank ${rankClass}">${RANK_LABEL[m.rank] || m.rank}</div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="card-tags">
+            <span class="tag tag-spec">${SPEC_LABEL[m.specialization] || m.specialization}</span>
+            <span class="tag tag-region">${m.region}</span>
+          </div>
+          <div class="card-stats">
+            <div class="card-stat">
+              <span class="card-stat-label">Hours</span>
+              <span class="card-stat-value${m.hours >= 5000 ? ' gold' : ''}">${formatHours(m.hours)}</span>
+            </div>
+            <div class="card-stat">
+              <span class="card-stat-label">Joined</span>
+              <span class="card-stat-value" style="font-size:14px;padding-top:3px">${formatDate(m.join_date)}</span>
+            </div>
+            ${m.discord_tag ? `
+            <div class="card-stat">
+              <span class="card-stat-label">Discord</span>
+              <span class="card-stat-value" style="font-size:12px;font-family:'Share Tech Mono',monospace;color:var(--text-dim);padding-top:4px">${m.discord_tag}</span>
+            </div>` : ''}
+          </div>
+        </div>
+      </div>`;
+  }
+
+  function applyFilter() {
+    const grid = document.getElementById('members-grid');
+    let filtered = allMembers;
+
+    if (activeFilter !== 'all') {
+      const [type, val] = activeFilter.split(':');
+      if (type === 'rank') filtered = allMembers.filter(m => m.rank === val);
+      if (type === 'spec') filtered = allMembers.filter(m => m.specialization === val);
+    }
+
+    if (filtered.length === 0) {
+      grid.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state-icon">🔍</div>
+          <div class="empty-state-text">No members found</div>
+        </div>`;
+      return;
+    }
+
+    grid.innerHTML = filtered.map((m, i) => renderCard(m, i)).join('');
+  }
+
+  function updateStats() {
+    const el = document.getElementById('roster-stats');
+    el.style.display = 'flex';
+    document.getElementById('stat-total').textContent   = allMembers.length;
+    document.getElementById('stat-leaders').textContent = allMembers.filter(m => ['leader','co-leader'].includes(m.rank)).length;
+    document.getElementById('stat-vets').textContent    = allMembers.filter(m => m.rank === 'veteran').length;
+    document.getElementById('stat-members').textContent = allMembers.filter(m => m.rank === 'member').length;
+    document.getElementById('hero-sub').textContent     = `${allMembers.length} active players — Season 2025`;
+  }
+
+  async function loadRoster() {
+    try {
+      const res = await fetch('/api/roster/');
+      allMembers = await res.json();
+      updateStats();
+      applyFilter();
+    } catch (e) {
+      document.getElementById('members-grid').innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state-icon">⚠️</div>
+          <div class="empty-state-text">Failed to load roster</div>
+        </div>`;
+      document.getElementById('hero-sub').textContent = 'Error loading data';
+    }
+  }
+
+  // ── FILTERS ─────────────────────────────────────────────────
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      activeFilter = btn.dataset.filter;
+      applyFilter();
+    });
+  });
+
+  loadRoster();
+
+// ── AUTH NAV ─────────────────────────────────────────────
+(function(){
+  const token    = localStorage.getItem('wf_token');
+  const username = localStorage.getItem('wf_username');
+  const el = document.getElementById('nav-auth');
+  if(!el) return;
+  if(token && username){
+    el.innerHTML = `<span style="font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:2px;color:var(--purple-bright);border:1px solid rgba(155,48,255,.35);padding:10px 18px;">▶ ${username.toUpperCase()}</span>
+      <button onclick="localStorage.removeItem('wf_token');localStorage.removeItem('wf_username');location.reload();" style="font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:2px;color:var(--text-dim);background:none;border:1px solid rgba(155,48,255,.15);padding:10px 14px;cursor:pointer;transition:color .2s;" onmouseenter="this.style.color='#ff3355'" onmouseleave="this.style.color='var(--text-dim)'">ВЫЙТИ</button>`;
+  } else {
+    el.innerHTML = '<a href="/auth/" class="nav-login">ВОЙТИ</a>';
+  }
+})();
+</script>
+</body>
+</html>
