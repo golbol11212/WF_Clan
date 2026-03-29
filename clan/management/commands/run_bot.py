@@ -317,7 +317,7 @@ class Command(BaseCommand):
             int(config.steam_id),
             int(config.player_token),
         )
-        socket = RustSocket(server, use_fp_proxy=True)
+        socket = RustSocket(server)
 
         # Очищаем предыдущие обработчики событий при переподключении
         TeamEventPayload.HANDLER_LIST.unregister_all()
