@@ -310,6 +310,15 @@ class Command(BaseCommand):
         config_updated_at = config.updated_at
         logger.info(f'Подключение к {config.ip}:{config.port} (steam_id={config.steam_id})...')
 
+        # Патч: обходим запрос к companion-rust.facepunch.com (блокируется на некоторых хостах)
+        try:
+            from rustplus.remote.proxy.proxy_value_grabber import ProxyValueGrabber
+            import time as _time
+            ProxyValueGrabber.VALUE = 9999999999999
+            ProxyValueGrabber.LAST_FETCHED = _time.time()
+        except Exception:
+            pass
+
         # Создаём объект с данными сервера
         server = ServerDetails(
             str(config.ip),
