@@ -1,0 +1,12 @@
+Django==5.1.7
+djangorestframework==3.16.0
+django-cors-headers==4.9.0
+gunicorn==21.2.0
+rustplus==6.0.9
+rustPlusPushReceiver==0.6.1
+discord.py==2.7.1
+aiohttp==3.13.3
+websockets==15.0.1
+protobuf==7.34.1
+requests==2.32.3
+pillow==11.1.0
