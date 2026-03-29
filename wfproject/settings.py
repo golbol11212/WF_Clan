@@ -1,6 +1,16 @@
+import os
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Загружаем .env файл если есть
+_env_file = BASE_DIR / '.env'
+if _env_file.exists():
+    for _line in _env_file.read_text(encoding='utf-8').splitlines():
+        _line = _line.strip()
+        if _line and not _line.startswith('#') and '=' in _line:
+            _k, _v = _line.split('=', 1)
+            os.environ.setdefault(_k.strip(), _v.strip())
 
 SECRET_KEY = 'wf-clan-secret-key-change-in-production-2025'
 
@@ -72,10 +82,17 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # CORS — разрешаем все источники в режиме DEBUG
 CORS_ALLOW_ALL_ORIGINS = DEBUG
 
+# YouTube Data API v3 (нужен для автозаполнения просмотров/длительности/даты)
+# Получить ключ: https://console.cloud.google.com/ → YouTube Data API v3
+YOUTUBE_API_KEY = ''  # вставь сюда свой ключ
+
 # Discord webhooks
 DISCORD_WEBHOOK_URL        = 'https://discord.com/api/webhooks/1478693170542936184/SFQlxMJii2cG52Eh3rfhb-xNAf3XB_f4hl9koAXFWvzdkW7qsPWD5vjW3Q3Qlotn6KUz'  # заявки
 DISCORD_CLAN_WEBHOOK_URL   = 'https://discord.com/api/webhooks/1478885072592437279/4W7AGtOImnnzbisvP0oJ66iSt7zcmtz0Uy6pCdX8m8cP67rsvIpQiRyofgODW-qt4zq3'  # вайпы + регистрации
 DISCORD_ROSTER_WEBHOOK_URL = 'https://discord.com/api/webhooks/1478887988850327713/XDEFpiavVScpUuHI6fKtoFnOvBCJjhJwLJ5CxvRdinmLbAeM49SuPd8NQdEWnE8zK5dh'  # состав клана
+
+# Discord бот (токен хранится в .env файле)
+DISCORD_BOT_TOKEN = os.environ.get('DISCORD_BOT_TOKEN', '')
 
 REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': [

@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Профиль | WF Clan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet"></noscript>
+<style>
+:root{
+  --void:#020005;--obsidian:#0a0010;--deep:#0d0018;
+  --purple-core:#4B0082;--purple-glow:#6a00b8;--purple-neon:#9b30ff;--purple-bright:#bf5fff;
+  --ember:#ff4500;--steel:#1a1a2e;
+  --text-primary:#e8ddf5;--text-dim:#7a6d8a;
+  --glass-bg:rgba(15,0,25,0.7);--glass-border:rgba(155,48,255,0.2);
+  --green:#00ff88;--red:#ff3355;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--void);color:var(--text-primary);font-family:'Rajdhani',sans-serif;overflow-x:hidden;cursor:none;min-height:100vh;}
+
+/* CURSOR */
+#cur{position:fixed;width:8px;height:8px;background:var(--purple-neon);border-radius:50%;pointer-events:none;z-index:9999;box-shadow:0 0 10px var(--purple-neon),0 0 20px var(--purple-core);transition:transform .1s;}
+#curR{position:fixed;width:28px;height:28px;border:1px solid rgba(155,48,255,.5);border-radius:50%;pointer-events:none;z-index:9998;transition:all .08s linear;}
+
+/* NOISE */
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");opacity:.025;pointer-events:none;z-index:0;}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 48px;background:rgba(2,0,5,.9);border-bottom:1px solid rgba(75,0,130,.25);backdrop-filter:blur(20px);z-index:100;}
+.nav-logo{display:flex;align-items:center;gap:12px;text-decoration:none;font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:6px;color:var(--purple-bright);text-shadow:0 0 20px var(--purple-neon);}
+.nav-logo span{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--text-dim);border-left:1px solid rgba(75,0,130,.4);padding-left:12px;}
+.nav-links-row{display:flex;align-items:center;gap:8px;}
+.nav-lnk{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--text-dim);text-decoration:none;padding:6px 14px;border:1px solid transparent;transition:all .25s;clip-path:polygon(6px 0%,100% 0%,calc(100% - 6px) 100%,0% 100%);}
+.nav-lnk:hover{color:var(--purple-bright);border-color:rgba(155,48,255,.3);background:rgba(75,0,130,.1);}
+.nav-lnk.active{background:linear-gradient(135deg,var(--purple-core),var(--purple-glow));border-color:var(--purple-neon);color:#fff;}
+#nav-user{display:flex;align-items:center;gap:8px;}
+
+/* AMBIENT */
+.orb{position:fixed;border-radius:50%;pointer-events:none;z-index:0;filter:blur(80px);opacity:.12;animation:orbFloat 12s ease-in-out infinite;}
+.orb1{width:600px;height:600px;background:var(--purple-core);top:-150px;left:-150px;}
+.orb2{width:400px;height:400px;background:var(--purple-glow);bottom:-80px;right:-80px;animation-delay:-6s;}
+@keyframes orbFloat{0%,100%{transform:translate(0,0)}50%{transform:translate(20px,-15px)}}
+
+/* ── HERO ───────────────────────────────────────────────── */
+.profile-hero{
+  position:relative;margin-top:64px;
+  min-height:280px;overflow:hidden;
+  display:flex;align-items:flex-end;
+  background:linear-gradient(135deg,rgba(75,0,130,.35) 0%,rgba(2,0,5,.9) 70%);
+  border-bottom:1px solid rgba(155,48,255,.2);
+  z-index:1;
+}
+.hero-hex-bg{
+  position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='70'%3E%3Cpolygon points='30,2 56,17 56,53 30,68 4,53 4,17' fill='none' stroke='rgba(155%2C48%2C255%2C0.07)' stroke-width='1'/%3E%3C/svg%3E");
+  background-size:60px 70px;
+  opacity:1;
+}
+.hero-scan{
+  position:absolute;inset:0;
+  background:linear-gradient(0deg,transparent 0%,rgba(155,48,255,.04) 50%,transparent 100%);
+  background-size:100% 4px;
+  animation:scanMove 8s linear infinite;
+  pointer-events:none;
+}
+@keyframes scanMove{0%{background-position:0 0}100%{background-position:0 100%}}
+.hero-content{
+  position:relative;z-index:2;
+  display:flex;align-items:flex-end;gap:32px;
+  padding:40px 60px 36px;
+  width:100%;
+}
+.hero-avatar-zone{position:relative;flex-shrink:0;}
+.hero-avatar{
+  width:140px;height:140px;border-radius:50%;
+  border:3px solid rgba(155,48,255,.6);
+  object-fit:cover;display:block;
+  box-shadow:0 0 40px rgba(155,48,255,.4),0 0 80px rgba(75,0,130,.2);
+}
+.hero-avatar-placeholder{
+  width:140px;height:140px;border-radius:50%;
+  border:3px solid rgba(155,48,255,.3);
+  background:radial-gradient(circle,rgba(75,0,130,.4),rgba(10,0,16,.9));
+  display:flex;align-items:center;justify-content:center;
+  font-size:52px;color:rgba(155,48,255,.4);
+  box-shadow:0 0 40px rgba(75,0,130,.2);
+}
+.hero-steam-badge{
+  position:absolute;bottom:4px;right:4px;
+  width:32px;height:32px;border-radius:50%;
+  background:#171a21;border:2px solid rgba(155,48,255,.5);
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 0 12px rgba(155,48,255,.3);
+}
+.hero-ring{
+  position:absolute;inset:-8px;border-radius:50%;
+  border:1px solid rgba(155,48,255,.2);
+  animation:heroRingPulse 3s ease-in-out infinite;
+}
+.hero-ring2{
+  position:absolute;inset:-16px;border-radius:50%;
+  border:1px solid rgba(155,48,255,.1);
+  animation:heroRingPulse 3s ease-in-out infinite;animation-delay:.5s;
+}
+@keyframes heroRingPulse{0%,100%{opacity:.3;transform:scale(1)}50%{opacity:.8;transform:scale(1.03)}}
+.hero-info{flex:1;}
+.hero-tag{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:4px;color:var(--purple-neon);margin-bottom:8px;display:flex;align-items:center;gap:10px;}
+.hero-tag::before{content:'';width:20px;height:1px;background:var(--purple-neon);}
+.hero-username{font-family:'Bebas Neue',sans-serif;font-size:clamp(48px,5vw,72px);letter-spacing:4px;line-height:.95;color:var(--text-primary);text-shadow:0 0 40px rgba(155,48,255,.2);}
+.hero-steamname{font-family:'Share Tech Mono',monospace;font-size:12px;letter-spacing:2px;color:var(--purple-bright);margin-top:8px;display:flex;align-items:center;gap:8px;}
+.hero-steamname::before{content:'◈';font-size:8px;}
+.hero-steamname.empty{color:var(--text-dim);}
+.hero-stats-row{display:flex;gap:2px;margin-top:24px;}
+.hero-stat{
+  background:rgba(15,0,25,.7);border:1px solid rgba(155,48,255,.15);
+  padding:10px 20px;text-align:center;
+  clip-path:polygon(6px 0%,100% 0%,calc(100% - 6px) 100%,0% 100%);
+}
+.hero-stat-val{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;color:var(--purple-bright);line-height:1;}
+.hero-stat-lbl{font-family:'Share Tech Mono',monospace;font-size:7px;letter-spacing:2px;color:var(--text-dim);margin-top:2px;}
+.hero-joined{font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--text-dim);margin-top:12px;}
+
+/* ── MAIN LAYOUT ───────────────────────────────────────── */
+.profile-wrap{max-width:1280px;margin:0 auto;padding:40px 60px 80px;position:relative;z-index:1;}
+.profile-grid{display:grid;grid-template-columns:1fr 360px;gap:24px;align-items:start;}
+.profile-left{display:flex;flex-direction:column;gap:24px;}
+.profile-right{display:flex;flex-direction:column;gap:24px;}
+
+/* ── CARD ──────────────────────────────────────────────── */
+.pcard{
+  background:var(--glass-bg);border:1px solid var(--glass-border);
+  position:relative;overflow:hidden;
+}
+.pcard::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--purple-neon),transparent);
+  opacity:.6;
+}
+.pcard-head{
+  display:flex;align-items:center;gap:12px;
+  padding:20px 28px 16px;
+  border-bottom:1px solid rgba(155,48,255,.08);
+}
+.pcard-icon{
+  width:32px;height:32px;
+  background:rgba(75,0,130,.3);border:1px solid rgba(155,48,255,.3);
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;flex-shrink:0;
+  clip-path:polygon(4px 0%,100% 0%,calc(100% - 4px) 100%,0% 100%);
+}
+.pcard-title{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:3px;color:var(--text-primary);}
+.pcard-sub{font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--text-dim);margin-left:auto;}
+.pcard-body{padding:24px 28px;}
+
+/* ── FORM ELEMENTS ─────────────────────────────────────── */
+.pfield{margin-bottom:20px;}
+.pfield:last-child{margin-bottom:0;}
+.plabel{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--text-dim);margin-bottom:8px;display:flex;align-items:center;gap:8px;text-transform:uppercase;}
+.plabel-badge{font-size:7px;padding:2px 6px;border:1px solid rgba(155,48,255,.3);color:var(--purple-neon);background:rgba(75,0,130,.15);}
+.pinput{
+  width:100%;
+  font-family:'Share Tech Mono',monospace;font-size:12px;letter-spacing:1px;
+  background:rgba(5,0,12,.8);border:1px solid rgba(155,48,255,.2);
+  color:var(--text-primary);padding:12px 16px;
+  transition:border-color .25s,box-shadow .25s;outline:none;
+  clip-path:polygon(4px 0%,100% 0%,calc(100% - 4px) 100%,0% 100%);
+}
+.pinput:focus{border-color:rgba(155,48,255,.7);box-shadow:0 0 16px rgba(155,48,255,.1);}
+.pinput:read-only{color:var(--text-dim);cursor:default;border-color:rgba(155,48,255,.1);}
+.pinput::placeholder{color:rgba(122,109,138,.5);}
+.ptextarea{
+  width:100%;resize:vertical;min-height:100px;
+  font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:400;line-height:1.6;
+  background:rgba(5,0,12,.8);border:1px solid rgba(155,48,255,.2);
+  color:var(--text-primary);padding:12px 16px;
+  transition:border-color .25s,box-shadow .25s;outline:none;
+}
+.ptextarea:focus{border-color:rgba(155,48,255,.7);box-shadow:0 0 16px rgba(155,48,255,.1);}
+.ptextarea::placeholder{color:rgba(122,109,138,.5);}
+.char-counter{font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:1px;color:var(--text-dim);text-align:right;margin-top:4px;}
+.char-counter.warn{color:#ffb400;}
+.char-counter.over{color:var(--red);}
+.pselect{
+  width:100%;appearance:none;
+  font-family:'Share Tech Mono',monospace;font-size:12px;letter-spacing:1px;
+  background:rgba(5,0,12,.8);border:1px solid rgba(155,48,255,.2);
+  color:var(--text-primary);padding:12px 16px;
+  cursor:none;outline:none;
+  clip-path:polygon(4px 0%,100% 0%,calc(100% - 4px) 100%,0% 100%);
+}
+.prow{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.prow3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;}
+
+/* STEAM ROW */
+.steam-input-row{display:flex;gap:8px;}
+.steam-input-row .pinput{flex:1;}
+.steam-fetch-btn{
+  font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:2px;
+  padding:0 16px;background:rgba(75,0,130,.2);border:1px solid rgba(155,48,255,.25);
+  color:var(--purple-bright);cursor:none;transition:all .25s;white-space:nowrap;
+  clip-path:polygon(6px 0%,100% 0%,calc(100% - 6px) 100%,0% 100%);
+}
+.steam-fetch-btn:hover{background:rgba(75,0,130,.4);border-color:var(--purple-neon);box-shadow:0 0 16px rgba(75,0,130,.3);}
+
+/* STEAM PREVIEW */
+.steam-preview{
+  display:flex;align-items:center;gap:16px;
+  padding:16px;margin-top:16px;
+  background:rgba(23,26,33,.6);border:1px solid rgba(155,48,255,.12);
+  transition:all .3s;
+}
+.steam-preview.hidden{display:none;}
+.steam-preview-avatar{width:52px;height:52px;border-radius:4px;border:1px solid rgba(155,48,255,.3);object-fit:cover;}
+.steam-preview-info{}
+.steam-preview-name{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;color:var(--text-primary);}
+.steam-preview-tag{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--purple-neon);}
+.steam-status{display:flex;align-items:center;gap:8px;margin-top:12px;font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;}
+.steam-status-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.steam-status-dot.linked{background:var(--green);box-shadow:0 0 8px var(--green);}
+.steam-status-dot.unlinked{background:var(--text-dim);}
+.steam-status.linked{color:var(--green);}
+.steam-status.unlinked{color:var(--text-dim);}
+
+/* ROLE GRID */
+.role-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;}
+.role-card{
+  padding:14px 8px;text-align:center;
+  background:rgba(10,0,16,.6);border:1px solid rgba(155,48,255,.12);
+  cursor:none;transition:all .25s;
+  clip-path:polygon(4px 0%,100% 0%,calc(100% - 4px) 100%,0% 100%);
+}
+.role-card:hover{border-color:rgba(155,48,255,.4);background:rgba(75,0,130,.1);}
+.role-card.selected{background:rgba(75,0,130,.3);border-color:var(--purple-neon);box-shadow:0 0 16px rgba(75,0,130,.2);}
+.role-card-icon{font-size:22px;margin-bottom:6px;display:block;}
+.role-card-name{font-family:'Share Tech Mono',monospace;font-size:7px;letter-spacing:1px;color:var(--text-dim);}
+.role-card.selected .role-card-name{color:var(--purple-bright);}
+
+/* REGION GRID */
+.region-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+.region-card{
+  padding:12px 8px;text-align:center;
+  background:rgba(10,0,16,.6);border:1px solid rgba(155,48,255,.12);
+  cursor:none;transition:all .25s;
+  clip-path:polygon(4px 0%,100% 0%,calc(100% - 4px) 100%,0% 100%);
+}
+.region-card:hover{border-color:rgba(155,48,255,.4);background:rgba(75,0,130,.1);}
+.region-card.selected{background:rgba(75,0,130,.3);border-color:var(--purple-neon);box-shadow:0 0 16px rgba(75,0,130,.2);}
+.region-card-flag{font-size:20px;display:block;margin-bottom:4px;}
+.region-card-name{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--text-dim);}
+.region-card.selected .region-card-name{color:var(--purple-bright);}
+
+/* STAT MINI CARD */
+.mini-stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.mini-stat{
+  padding:16px;
+  background:rgba(10,0,16,.8);border:1px solid rgba(155,48,255,.1);
+  position:relative;overflow:hidden;
+}
+.mini-stat::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 0%,rgba(155,48,255,.06),transparent 70%);}
+.mini-stat-val{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:2px;color:var(--purple-bright);line-height:1;}
+.mini-stat-lbl{font-family:'Share Tech Mono',monospace;font-size:7px;letter-spacing:2px;color:var(--text-dim);margin-top:2px;}
+
+/* DISCORD INPUT */
+.discord-prefix{
+  display:flex;align-items:center;
+  background:rgba(88,101,242,.1);border:1px solid rgba(88,101,242,.25);
+  border-right:none;
+  padding:0 12px;
+  font-family:'Share Tech Mono',monospace;font-size:12px;color:rgba(88,101,242,.8);
+  clip-path:polygon(4px 0%,100% 0%,100% 100%,0% 100%);
+  flex-shrink:0;
+}
+.discord-row{display:flex;}
+.discord-row .pinput{clip-path:polygon(0 0,100% 0,calc(100% - 4px) 100%,0 100%);}
+
+/* SECURITY */
+.pw-strength{height:3px;margin-top:6px;background:rgba(155,48,255,.1);position:relative;overflow:hidden;}
+.pw-strength-bar{height:100%;width:0;transition:width .3s,background .3s;}
+
+/* SAVE BUTTON */
+.psave{
+  width:100%;
+  font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:4px;
+  padding:14px;
+  background:linear-gradient(135deg,var(--purple-core),var(--purple-glow));
+  border:1px solid var(--purple-neon);color:#fff;cursor:none;
+  transition:all .3s;margin-top:4px;
+  clip-path:polygon(8px 0%,100% 0%,calc(100% - 8px) 100%,0% 100%);
+  position:relative;overflow:hidden;
+}
+.psave::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent 40%,rgba(255,255,255,.06));opacity:0;transition:opacity .3s;}
+.psave:hover{box-shadow:0 0 32px rgba(75,0,130,.6);}
+.psave:hover::before{opacity:1;}
+.psave:disabled{opacity:.4;box-shadow:none;}
+
+/* DANGER */
+.danger-card{border-color:rgba(255,51,85,.2);}
+.danger-card::before{background:linear-gradient(90deg,transparent,var(--red),transparent);opacity:.4;}
+.danger-btn{
+  width:100%;
+  font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:4px;
+  padding:14px;
+  background:rgba(255,51,85,.08);border:1px solid rgba(255,51,85,.35);
+  color:var(--red);cursor:none;transition:all .3s;
+  clip-path:polygon(8px 0%,100% 0%,calc(100% - 8px) 100%,0% 100%);
+}
+.danger-btn:hover{background:rgba(255,51,85,.2);box-shadow:0 0 24px rgba(255,51,85,.2);}
+
+/* MESSAGE */
+.pmsg{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:1px;min-height:16px;margin-top:10px;display:flex;align-items:center;gap:6px;}
+.pmsg.ok{color:var(--green);}
+.pmsg.ok::before{content:'✓';}
+.pmsg.err{color:var(--red);}
+.pmsg.err::before{content:'✕';}
+
+/* DIVIDER */
+.pdivider{height:1px;background:linear-gradient(90deg,transparent,rgba(155,48,255,.15),transparent);margin:20px 0;}
+
+/* FLOATING SAVE */
+.float-save{
+  position:fixed;bottom:32px;right:60px;
+  z-index:200;
+  display:flex;align-items:center;gap:12px;
+  background:rgba(10,0,18,.95);
+  border:1px solid rgba(155,48,255,.4);
+  padding:12px 20px;
+  backdrop-filter:blur(16px);
+  box-shadow:0 8px 40px rgba(75,0,130,.4);
+  clip-path:polygon(10px 0%,100% 0%,calc(100% - 10px) 100%,0% 100%);
+  transform:translateY(80px);opacity:0;
+  transition:transform .4s cubic-bezier(.16,1,.3,1),opacity .4s;
+}
+.float-save.visible{transform:translateY(0);opacity:1;}
+.float-save-text{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--text-dim);}
+.float-save-btn{
+  font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:3px;
+  padding:8px 20px;
+  background:linear-gradient(135deg,var(--purple-core),var(--purple-glow));
+  border:1px solid var(--purple-neon);color:#fff;cursor:none;transition:all .25s;
+  clip-path:polygon(6px 0%,100% 0%,calc(100% - 6px) 100%,0% 100%);
+}
+.float-save-btn:hover{box-shadow:0 0 20px rgba(75,0,130,.5);}
+
+/* ACCOUNT INFO */
+.account-meta{display:flex;flex-direction:column;gap:10px;}
+.account-meta-item{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:10px 0;border-bottom:1px solid rgba(155,48,255,.06);
+}
+.account-meta-key{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--text-dim);}
+.account-meta-val{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:1px;color:var(--text-primary);}
+
+/* FOOTER */
+footer{border-top:1px solid rgba(75,0,130,.1);padding:24px 60px;display:flex;align-items:center;justify-content:space-between;position:relative;z-index:1;}
+.footer-logo{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:6px;color:rgba(155,48,255,.25);}
+.footer-text{font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:3px;color:var(--text-dim);}
+
+/* REVEAL */
+.reveal{opacity:0;transform:translateY(20px);transition:opacity .5s,transform .5s;}
+.reveal.visible{opacity:1;transform:none;}
+
+@media(max-width:1024px){
+  .profile-grid{grid-template-columns:1fr;}
+  nav{padding:0 20px;}
+  .profile-wrap{padding:32px 20px 60px;}
+  .hero-content{padding:32px 20px 28px;gap:20px;}
+  .hero-avatar,.hero-avatar-placeholder{width:100px;height:100px;}
+  .hero-username{font-size:40px;}
+  .role-grid{grid-template-columns:repeat(5,1fr);}
+}
+</style>
+</head>
+<body>
+
+<div id="cur"></div>
+<div id="curR"></div>
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+
+<!-- NAV -->
+<nav>
+  <a href="/" class="nav-logo">WF <span>Wasteland Forsaken</span></a>
+  <div class="nav-links-row">
+    <a href="/" class="nav-lnk">Главная</a>
+    <a href="/hub/" class="nav-lnk">Hub</a>
+    <a href="/roster/" class="nav-lnk">Roster</a>
+    <a href="/wipe/" class="nav-lnk">Wipe</a>
+    <a href="/profile/" class="nav-lnk active">Профиль</a>
+  </div>
+  <div id="nav-user"></div>
+</nav>
+
+<!-- PROFILE HERO -->
+<div class="profile-hero" id="profile-hero">
+  <div class="hero-hex-bg"></div>
+  <div class="hero-scan"></div>
+  <div class="hero-content">
+    <div class="hero-avatar-zone">
+      <div class="hero-ring"></div>
+      <div class="hero-ring2"></div>
+      <div id="hero-avatar-wrap">
+        <div class="hero-avatar-placeholder">◈</div>
+      </div>
+      <div class="hero-steam-badge">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="rgba(155,48,255,.9)"><path d="M12 0C5.4 0 0 5.4 0 12c0 5.2 3.3 9.7 8 11.4l3.7-8.6c-.7-.5-1.2-1.3-1.2-2.3 0-1.7 1.3-3 3-3 1.7 0 3 1.3 3 3s-1.3 3-3 3c-.1 0-.2 0-.3 0l-8.5 3.7C7.3 22 9.5 23 12 23c6.6 0 12-5.4 12-12S18.6 0 12 0z"/></svg>
+      </div>
+    </div>
+    <div class="hero-info">
+      <div class="hero-tag">// PLAYER PROFILE</div>
+      <div class="hero-username" id="hero-username">—</div>
+      <div class="hero-steamname empty" id="hero-steamname">Steam не привязан</div>
+      <div class="hero-stats-row" id="hero-stats-row">
+        <div class="hero-stat"><div class="hero-stat-val" id="hs-hours">—</div><div class="hero-stat-lbl">Часов в Rust</div></div>
+        <div class="hero-stat"><div class="hero-stat-val" id="hs-role">—</div><div class="hero-stat-lbl">Роль</div></div>
+        <div class="hero-stat"><div class="hero-stat-val" id="hs-region">—</div><div class="hero-stat-lbl">Регион</div></div>
+        <div class="hero-stat"><div class="hero-stat-val" id="hs-discord">—</div><div class="hero-stat-lbl">Discord</div></div>
+      </div>
+      <div class="hero-joined" id="hero-joined"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="profile-wrap">
+<div class="profile-grid">
+
+  <!-- LEFT -->
+  <div class="profile-left">
+
+    <!-- STEAM -->
+    <div class="pcard reveal" id="steam-card">
+      <div class="pcard-head">
+        <div class="pcard-icon">⚡</div>
+        <div class="pcard-title">STEAM</div>
+        <div class="pcard-sub">ИНТЕГРАЦИЯ</div>
+      </div>
+      <div class="pcard-body">
+        <div class="pfield">
+          <label class="plabel">URL профиля Steam <span class="plabel-badge">ОБЯЗАТЕЛЬНО</span></label>
+          <div class="steam-input-row">
+            <input class="pinput" id="f-steam-url" type="text" placeholder="steamcommunity.com/id/YourName">
+            <button class="steam-fetch-btn" id="steam-fetch-btn" onclick="fetchSteam()">ПРОВЕРИТЬ</button>
+          </div>
+          <div class="steam-preview hidden" id="steam-preview">
+            <img class="steam-preview-avatar" id="steam-preview-avatar" src="" alt="">
+            <div class="steam-preview-info">
+              <div class="steam-preview-name" id="steam-preview-name"></div>
+              <div class="steam-preview-tag">STEAM АККАУНТ НАЙДЕН</div>
+            </div>
+          </div>
+        </div>
+        <div id="steam-status-block">
+          <div class="steam-status unlinked" id="steam-status-line">
+            <div class="steam-status-dot unlinked"></div>
+            <span>Steam не привязан</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PERSONAL INFO -->
+    <div class="pcard reveal" style="transition-delay:.1s">
+      <div class="pcard-head">
+        <div class="pcard-icon">◈</div>
+        <div class="pcard-title">ЛИЧНАЯ ИНФОРМАЦИЯ</div>
+      </div>
+      <div class="pcard-body">
+        <div class="prow">
+          <div class="pfield">
+            <label class="plabel">Отображаемое имя</label>
+            <input class="pinput" id="f-display-name" type="text" placeholder="Как тебя называть">
+          </div>
+          <div class="pfield">
+            <label class="plabel">Часов в Rust</label>
+            <input class="pinput" id="f-hours" type="number" min="0" placeholder="0">
+          </div>
+        </div>
+
+        <div class="pfield">
+          <label class="plabel">Discord</label>
+          <div class="discord-row">
+            <div class="discord-prefix">discord.gg /</div>
+            <input class="pinput" id="f-discord" type="text" placeholder="username#0000">
+          </div>
+        </div>
+
+        <div class="pfield">
+          <label class="plabel">О себе <span class="plabel-badge">MAX 300</span></label>
+          <textarea class="ptextarea" id="f-bio" placeholder="Расскажи о себе — роль в команде, опыт, стиль игры..." maxlength="300" oninput="updateCharCount(this,'bio-counter')"></textarea>
+          <div class="char-counter" id="bio-counter">0 / 300</div>
+        </div>
+
+        <div class="pmsg" id="info-msg"></div>
+        <button class="psave" onclick="saveProfile()">СОХРАНИТЬ ПРОФИЛЬ</button>
+      </div>
+    </div>
+
+    <!-- SECURITY -->
+    <div class="pcard reveal" style="transition-delay:.2s">
+      <div class="pcard-head">
+        <div class="pcard-icon">🔒</div>
+        <div class="pcard-title">БЕЗОПАСНОСТЬ</div>
+        <div class="pcard-sub">АККАУНТ</div>
+      </div>
+      <div class="pcard-body">
+        <div class="pfield">
+          <label class="plabel">Email <span class="plabel-badge">ТОЛЬКО ЧТЕНИЕ</span></label>
+          <input class="pinput" id="f-email" type="email" readonly>
+        </div>
+        <div class="pdivider"></div>
+        <div class="pfield">
+          <label class="plabel">Текущий пароль</label>
+          <input class="pinput" id="f-old-pw" type="password" placeholder="••••••••" autocomplete="current-password">
+        </div>
+        <div class="prow">
+          <div class="pfield">
+            <label class="plabel">Новый пароль</label>
+            <input class="pinput" id="f-new-pw" type="password" placeholder="Мин. 8 символов" autocomplete="new-password" oninput="updatePwStrength(this.value)">
+            <div class="pw-strength"><div class="pw-strength-bar" id="pw-strength-bar"></div></div>
+          </div>
+          <div class="pfield">
+            <label class="plabel">Повтор пароля</label>
+            <input class="pinput" id="f-new-pw2" type="password" placeholder="Повторите пароль" autocomplete="new-password">
+          </div>
+        </div>
+        <div class="pmsg" id="pw-msg"></div>
+        <button class="psave" onclick="changePassword()">СМЕНИТЬ ПАРОЛЬ</button>
+      </div>
+    </div>
+
+  </div><!-- /left -->
+
+  <!-- RIGHT -->
+  <div class="profile-right">
+
+    <!-- ROLE -->
+    <div class="pcard reveal" style="transition-delay:.05s">
+      <div class="pcard-head">
+        <div class="pcard-icon">⚔</div>
+        <div class="pcard-title">РОЛЬ</div>
+        <div class="pcard-sub">В КОМАНДЕ</div>
+      </div>
+      <div class="pcard-body">
+        <div class="pfield">
+          <label class="plabel">Специализация</label>
+          <div class="role-grid" id="role-grid">
+            <div class="role-card" data-role="leader"   onclick="selectRole('leader')">   <span class="role-card-icon">👑</span><div class="role-card-name">ЛИДЕР</div></div>
+            <div class="role-card" data-role="deputy"   onclick="selectRole('deputy')">   <span class="role-card-icon">🎖️</span><div class="role-card-name">ЗАМ</div></div>
+            <div class="role-card" data-role="coller"   onclick="selectRole('coller')">   <span class="role-card-icon">🎯</span><div class="role-card-name">КОЛЕР</div></div>
+            <div class="role-card" data-role="builder"  onclick="selectRole('builder')">  <span class="role-card-icon">🔧</span><div class="role-card-name">БИЛДЕР</div></div>
+            <div class="role-card" data-role="electric" onclick="selectRole('electric')"> <span class="role-card-icon">⚡</span><div class="role-card-name">ЭЛЕКТРИК</div></div>
+            <div class="role-card" data-role="farmer"   onclick="selectRole('farmer')">   <span class="role-card-icon">⛏️</span><div class="role-card-name">ФАРМЕР</div></div>
+            <div class="role-card" data-role="combater" onclick="selectRole('combater')"> <span class="role-card-icon">🗡️</span><div class="role-card-name">КОМБАТЕР</div></div>
+            <div class="role-card" data-role="raider"   onclick="selectRole('raider')">   <span class="role-card-icon">💣</span><div class="role-card-name">РЕЙДЕР</div></div>
+            <div class="role-card" data-role="ferm"     onclick="selectRole('ferm')">     <span class="role-card-icon">🌾</span><div class="role-card-name">ФЕРМЕР</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- REGION -->
+    <div class="pcard reveal" style="transition-delay:.1s">
+      <div class="pcard-head">
+        <div class="pcard-icon">🌍</div>
+        <div class="pcard-title">РЕГИОН</div>
+      </div>
+      <div class="pcard-body">
+        <div class="region-grid" id="region-grid">
+          <div class="region-card" data-region="EU"   onclick="selectRegion('EU')">  <span class="region-card-flag">🇪🇺</span><div class="region-card-name">EU</div></div>
+          <div class="region-card" data-region="RU"   onclick="selectRegion('RU')">  <span class="region-card-flag">🇷🇺</span><div class="region-card-name">RU</div></div>
+          <div class="region-card" data-region="NA"   onclick="selectRegion('NA')">  <span class="region-card-flag">🇺🇸</span><div class="region-card-name">NA</div></div>
+          <div class="region-card" data-region="ASIA" onclick="selectRegion('ASIA')"><span class="region-card-flag">🌏</span><div class="region-card-name">ASIA</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ACCOUNT META -->
+    <div class="pcard reveal" style="transition-delay:.15s">
+      <div class="pcard-head">
+        <div class="pcard-icon">📋</div>
+        <div class="pcard-title">АККАУНТ</div>
+        <div class="pcard-sub">ИНФО</div>
+      </div>
+      <div class="pcard-body">
+        <div class="account-meta">
+          <div class="account-meta-item"><span class="account-meta-key">ЛОГИН</span><span class="account-meta-val" id="meta-username">—</span></div>
+          <div class="account-meta-item"><span class="account-meta-key">STEAM НИК</span><span class="account-meta-val" id="meta-steam">—</span></div>
+          <div class="account-meta-item"><span class="account-meta-key">РЕГИСТРАЦИЯ</span><span class="account-meta-val" id="meta-joined">—</span></div>
+          <div class="account-meta-item"><span class="account-meta-key">EMAIL</span><span class="account-meta-val" id="meta-email">—</span></div>
+        </div>
+        <div class="pdivider"></div>
+        <div class="mini-stat-grid">
+          <div class="mini-stat"><div class="mini-stat-val" id="mstat-hours">0</div><div class="mini-stat-lbl">ЧАСОВ</div></div>
+          <div class="mini-stat"><div class="mini-stat-val" id="mstat-role">—</div><div class="mini-stat-lbl">РОЛЬ</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DANGER -->
+    <div class="pcard danger-card reveal" style="transition-delay:.2s">
+      <div class="pcard-head">
+        <div class="pcard-icon" style="background:rgba(255,51,85,.1);border-color:rgba(255,51,85,.3);">⚠</div>
+        <div class="pcard-title" style="color:var(--red);">ОПАСНАЯ ЗОНА</div>
+      </div>
+      <div class="pcard-body">
+        <p style="font-size:13px;color:var(--text-dim);line-height:1.6;margin-bottom:20px;">Выход из аккаунта завершит сессию на всех устройствах где используется этот токен.</p>
+        <button class="danger-btn" onclick="doLogout()">ВЫЙТИ ИЗ АККАУНТА</button>
+      </div>
+    </div>
+
+  </div><!-- /right -->
+</div>
+</div><!-- /wrap -->
+
+<!-- FLOAT SAVE -->
+<div class="float-save" id="float-save">
+  <span class="float-save-text">НЕСОХРАНЁННЫЕ ИЗМЕНЕНИЯ</span>
+  <button class="float-save-btn" onclick="saveProfile()">СОХРАНИТЬ ▸</button>
+</div>
+
+<footer>
+  <div class="footer-logo">WF</div>
+  <div class="footer-text">© 2025 WASTELAND FORSAKEN · ALL RIGHTS RESERVED</div>
+  <div class="footer-text">PROFILE v1.0</div>
+</footer>
+
+<script>
+// ── CURSOR ───────────────────────────────────────────────
+const cur = document.getElementById('cur');
+const curR = document.getElementById('curR');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cur.style.left=(mx-4)+'px';cur.style.top=(my-4)+'px';});
+(function loop(){rx+=(mx-rx)*.12;ry+=(my-ry)*.12;curR.style.left=(rx-14)+'px';curR.style.top=(ry-14)+'px';requestAnimationFrame(loop);})();
+document.querySelectorAll('button,a,input,textarea,select,.role-card,.region-card').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{cur.style.transform='scale(2)';curR.style.transform='scale(1.5)';curR.style.borderColor='rgba(155,48,255,.9)';});
+  el.addEventListener('mouseleave',()=>{cur.style.transform='scale(1)';curR.style.transform='scale(1)';curR.style.borderColor='rgba(155,48,255,.5)';});
+});
+
+// ── AUTH CHECK ───────────────────────────────────────────
+const wfToken    = localStorage.getItem('wf_token');
+const wfUsername = localStorage.getItem('wf_username');
+if(!wfToken){ window.location.href = '/auth/'; }
+
+// ── STATE ────────────────────────────────────────────────
+let selectedRole   = 'any';
+let selectedRegion = 'EU';
+let isDirty        = false;
+
+function setDirty(){
+  isDirty = true;
+  document.getElementById('float-save').classList.add('visible');
+}
+
+// Watch inputs for changes
+document.querySelectorAll('.pinput:not([readonly]),.ptextarea').forEach(el=>{
+  el.addEventListener('input', setDirty);
+});
+
+// ── NAV USER ─────────────────────────────────────────────
+(function(){
+  const el = document.getElementById('nav-user');
+  if(!el) return;
+  const av = localStorage.getItem('wf_avatar') || '';
+  const avHtml = av
+    ? '<img src="' + av + '" style="width:24px;height:24px;border-radius:50%;border:1px solid rgba(155,48,255,.5);object-fit:cover;display:block;">'
+    : '<span style="width:24px;height:24px;border-radius:50%;border:1px solid rgba(155,48,255,.4);background:rgba(75,0,130,.3);display:flex;align-items:center;justify-content:center;font-size:10px;color:#9b30ff;">◈</span>';
+  el.style.cssText = 'display:flex;align-items:center;gap:8px;';
+  el.innerHTML = '<span style="display:flex;align-items:center;gap:8px;font-family:\'Share Tech Mono\',monospace;font-size:9px;letter-spacing:2px;color:#bf5fff;border:1px solid rgba(155,48,255,.35);padding:6px 14px;">'
+    + avHtml + ' ▶ ' + (wfUsername||'').toUpperCase() + '</span>';
+})();
+
+// ── ROLE SELECT ──────────────────────────────────────────
+function selectRole(role){
+  selectedRole = role;
+  document.querySelectorAll('.role-card').forEach(c=>c.classList.toggle('selected', c.dataset.role===role));
+  const labels = {leader:'ЛИДЕР',deputy:'ЗАМ',coller:'КОЛЕР',builder:'БИЛДЕР',electric:'ЭЛЕК',farmer:'ФАРМЕР',combater:'КОМБАТ',raider:'РЕЙДЕР',ferm:'ФЕРМЕР'};
+  document.getElementById('hs-role').textContent  = labels[role] || role.toUpperCase();
+  document.getElementById('mstat-role').textContent = labels[role] || role.toUpperCase();
+  setDirty();
+}
+
+// ── REGION SELECT ────────────────────────────────────────
+function selectRegion(region){
+  selectedRegion = region;
+  document.querySelectorAll('.region-card').forEach(c=>c.classList.toggle('selected', c.dataset.region===region));
+  document.getElementById('hs-region').textContent = region;
+  setDirty();
+}
+
+// ── CHAR COUNTER ─────────────────────────────────────────
+function updateCharCount(el, counterId){
+  const len = el.value.length;
+  const max = parseInt(el.getAttribute('maxlength')) || 300;
+  const counter = document.getElementById(counterId);
+  counter.textContent = len + ' / ' + max;
+  counter.className = 'char-counter' + (len > max*0.9 ? (len >= max ? ' over' : ' warn') : '');
+}
+
+// ── PASSWORD STRENGTH ────────────────────────────────────
+function updatePwStrength(pw){
+  const bar = document.getElementById('pw-strength-bar');
+  let score = 0;
+  if(pw.length >= 8)  score++;
+  if(pw.length >= 12) score++;
+  if(/[A-Z]/.test(pw)) score++;
+  if(/[0-9]/.test(pw)) score++;
+  if(/[^A-Za-z0-9]/.test(pw)) score++;
+  const pct  = (score/5)*100;
+  const color = score<=1?'#ff3355':score<=2?'#ffb400':score<=3?'#9b30ff':score<=4?'#6a00b8':'#00ff88';
+  bar.style.width  = pct + '%';
+  bar.style.background = color;
+}
+
+// ── POPULATE PROFILE ─────────────────────────────────────
+function populateHero(d){
+  document.getElementById('hero-username').textContent = d.display_name || d.username || '—';
+
+  const steamEl = document.getElementById('hero-steamname');
+  if(d.steam_name){ steamEl.textContent = d.steam_name; steamEl.classList.remove('empty'); }
+  else             { steamEl.textContent = 'Steam не привязан'; steamEl.classList.add('empty'); }
+
+  const labels = {leader:'ЛИДЕР',deputy:'ЗАМ',coller:'КОЛЕР',builder:'БИЛДЕР',electric:'ЭЛЕК',farmer:'ФАРМЕР',combater:'КОМБАТ',raider:'РЕЙДЕР',ferm:'ФЕРМЕР'};
+  document.getElementById('hs-hours').textContent  = d.hours || '0';
+  document.getElementById('hs-role').textContent   = labels[d.role] || (d.role||'—').toUpperCase();
+  document.getElementById('hs-region').textContent = d.region || '—';
+  document.getElementById('hs-discord').textContent = d.discord_tag ? d.discord_tag.split('#')[0] : '—';
+  if(d.date_joined) document.getElementById('hero-joined').textContent = '// УЧАСТНИК С ' + d.date_joined;
+
+  // hero avatar
+  const wrap = document.getElementById('hero-avatar-wrap');
+  if(d.avatar_url){
+    wrap.innerHTML = '<img class="hero-avatar" src="' + d.avatar_url + '" alt="">';
+  } else {
+    wrap.innerHTML = '<div class="hero-avatar-placeholder">◈</div>';
+  }
+
+  // meta
+  document.getElementById('meta-username').textContent = d.username || '—';
+  document.getElementById('meta-steam').textContent    = d.steam_name || '—';
+  document.getElementById('meta-joined').textContent   = d.date_joined || '—';
+  document.getElementById('meta-email').textContent    = d.email || '—';
+  document.getElementById('mstat-hours').textContent   = d.hours || '0';
+  document.getElementById('mstat-role').textContent    = labels[d.role] || '—';
+
+  // steam status
+  updateSteamStatus(d.steam_name, d.avatar_url);
+}
+
+function updateSteamStatus(steamName, avatarUrl){
+  const line = document.getElementById('steam-status-line');
+  const dot  = line.querySelector('.steam-status-dot');
+  if(steamName){
+    line.className = 'steam-status linked';
+    dot.className  = 'steam-status-dot linked';
+    line.querySelector('span').textContent = 'Привязан: ' + steamName;
+  } else {
+    line.className = 'steam-status unlinked';
+    dot.className  = 'steam-status-dot unlinked';
+    line.querySelector('span').textContent = 'Steam не привязан';
+  }
+}
+
+function populateForm(d){
+  document.getElementById('f-steam-url').value    = d.steam_url    || '';
+  document.getElementById('f-display-name').value = d.display_name || '';
+  document.getElementById('f-hours').value        = d.hours        || '';
+  document.getElementById('f-discord').value      = d.discord_tag  || '';
+  document.getElementById('f-bio').value          = d.bio          || '';
+  document.getElementById('f-email').value        = d.email        || '';
+  updateCharCount(document.getElementById('f-bio'), 'bio-counter');
+  selectRole(d.role   || 'any');
+  selectRegion(d.region || 'EU');
+}
+
+// ── LOAD PROFILE ─────────────────────────────────────────
+async function loadProfile(){
+  try {
+    const res  = await fetch('/api/auth/profile/', {headers:{'Authorization':'Token '+wfToken}});
+    const data = await res.json();
+    if(data.ok){
+      populateHero(data);
+      populateForm(data);
+      if(data.avatar_url) localStorage.setItem('wf_avatar',     data.avatar_url);
+      if(data.steam_name) localStorage.setItem('wf_steam_name', data.steam_name);
+      isDirty = false;
+      document.getElementById('float-save').classList.remove('visible');
+    } else {
+      window.location.href = '/auth/';
+    }
+  } catch(e){
+    console.error('loadProfile error', e);
+  }
+}
+
+// ── FETCH STEAM ──────────────────────────────────────────
+async function fetchSteam(){
+  const url = document.getElementById('f-steam-url').value.trim();
+  if(!url){ showMsg('info-msg','err','Введите URL'); return; }
+  const btn = document.getElementById('steam-fetch-btn');
+  btn.disabled = true; btn.textContent = '...';
+  const preview = document.getElementById('steam-preview');
+  preview.classList.add('hidden');
+  try {
+    const res  = await fetch('/api/auth/steam-lookup/?url=' + encodeURIComponent(url));
+    const data = await res.json();
+    if(data.ok){
+      document.getElementById('steam-preview-name').textContent = data.steam_name;
+      // Пробуем получить аватар тоже (через profile save), пока показываем ник
+      preview.classList.remove('hidden');
+      updateSteamStatus(data.steam_name, '');
+      showMsg('info-msg','ok','Профиль найден: ' + data.steam_name + ' — нажми «Сохранить»');
+      setDirty();
+    } else {
+      showMsg('info-msg','err', data.error || 'Профиль не найден или закрыт');
+    }
+  } catch(e){
+    showMsg('info-msg','err','Ошибка соединения');
+  }
+  btn.disabled = false; btn.textContent = 'ПРОВЕРИТЬ';
+}
+
+// ── SAVE PROFILE ─────────────────────────────────────────
+async function saveProfile(){
+  const msg = document.getElementById('info-msg');
+  showMsg('info-msg','', 'Сохранение...');
+  const floatBtn = document.querySelector('.float-save-btn');
+  if(floatBtn) floatBtn.disabled = true;
+  try {
+    const res = await fetch('/api/auth/profile/', {
+      method: 'PATCH',
+      headers: {'Content-Type':'application/json','Authorization':'Token '+wfToken},
+      body: JSON.stringify({
+        steam_url:    document.getElementById('f-steam-url').value.trim(),
+        display_name: document.getElementById('f-display-name').value.trim(),
+        hours:        parseInt(document.getElementById('f-hours').value) || 0,
+        discord_tag:  document.getElementById('f-discord').value.trim(),
+        bio:          document.getElementById('f-bio').value.trim(),
+        role:         selectedRole,
+        region:       selectedRegion,
+      }),
+    });
+    const data = await res.json();
+    if(data.ok){
+      showMsg('info-msg','ok','Сохранено!');
+      populateHero({...data, username:wfUsername, email:document.getElementById('f-email').value, date_joined:document.getElementById('hero-joined').textContent.replace('// УЧАСТНИК С ','')});
+      if(data.avatar_url){ localStorage.setItem('wf_avatar',data.avatar_url); }
+      if(data.steam_name){ localStorage.setItem('wf_steam_name',data.steam_name); }
+      isDirty = false;
+      document.getElementById('float-save').classList.remove('visible');
+    } else {
+      showMsg('info-msg','err', data.error || 'Ошибка сохранения');
+    }
+  } catch(e){
+    showMsg('info-msg','err','Ошибка соединения');
+  }
+  if(floatBtn) floatBtn.disabled = false;
+}
+
+// ── CHANGE PASSWORD ──────────────────────────────────────
+async function changePassword(){
+  const oldPw  = document.getElementById('f-old-pw').value;
+  const newPw  = document.getElementById('f-new-pw').value;
+  const newPw2 = document.getElementById('f-new-pw2').value;
+  if(!oldPw){ showMsg('pw-msg','err','Введите текущий пароль'); return; }
+  if(newPw !== newPw2){ showMsg('pw-msg','err','Пароли не совпадают'); return; }
+  if(newPw.length < 8){ showMsg('pw-msg','err','Минимум 8 символов'); return; }
+  showMsg('pw-msg','','Сохранение...');
+  try {
+    const res = await fetch('/api/auth/change-password/', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Token '+wfToken},
+      body:JSON.stringify({old_password:oldPw, new_password:newPw}),
+    });
+    const data = await res.json();
+    if(data.ok){
+      localStorage.setItem('wf_token', data.token);
+      document.getElementById('f-old-pw').value = '';
+      document.getElementById('f-new-pw').value = '';
+      document.getElementById('f-new-pw2').value = '';
+      document.getElementById('pw-strength-bar').style.width = '0';
+      showMsg('pw-msg','ok','Пароль изменён!');
+    } else {
+      showMsg('pw-msg','err', data.error || 'Ошибка');
+    }
+  } catch(e){
+    showMsg('pw-msg','err','Ошибка соединения');
+  }
+}
+
+// ── LOGOUT ───────────────────────────────────────────────
+function doLogout(){
+  ['wf_token','wf_username','wf_avatar','wf_steam_name'].forEach(function(k){ localStorage.removeItem(k); });
+  window.location.href = '/auth/';
+}
+
+// ── HELPERS ──────────────────────────────────────────────
+function showMsg(id, cls, text){
+  const el = document.getElementById(id);
+  el.className = 'pmsg' + (cls ? ' '+cls : '');
+  el.textContent = text;
+}
+
+// ── REVEAL ───────────────────────────────────────────────
+function triggerReveal(){
+  document.querySelectorAll('.reveal').forEach(el=>{
+    if(el.getBoundingClientRect().top < window.innerHeight - 40) el.classList.add('visible');
+  });
+}
+window.addEventListener('scroll', triggerReveal);
+
+// ── HOURS LIVE UPDATE ────────────────────────────────────
+document.getElementById('f-hours').addEventListener('input', function(){
+  document.getElementById('hs-hours').textContent   = this.value || '0';
+  document.getElementById('mstat-hours').textContent = this.value || '0';
+});
+
+// ── INIT ─────────────────────────────────────────────────
+loadProfile();
+setTimeout(triggerReveal, 100);
+</script>
+</body>
+</html>

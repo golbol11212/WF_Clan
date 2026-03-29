@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Настройки Rust+ бота</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #0d0d0d;
+      color: #e0e0e0;
+      min-height: 100vh;
+      padding: 32px 16px;
+    }
+
+    .page-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+    .page-header h1 { font-size: 1.6rem; font-weight: 700; }
+    .back-link {
+      color: #888;
+      text-decoration: none;
+      font-size: .875rem;
+    }
+    .back-link:hover { color: #ccc; }
+
+    /* Статус-бейдж */
+    .bot-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: .875rem;
+      font-weight: 600;
+      margin-left: auto;
+    }
+    .bot-status.active   { background: #1a3a1a; color: #4caf50; border: 1px solid #2e7d32; }
+    .bot-status.inactive { background: #2a1a1a; color: #ef5350; border: 1px solid #c62828; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; }
+    .dot.green { background: #4caf50; box-shadow: 0 0 6px #4caf50; }
+    .dot.red   { background: #ef5350; }
+
+    /* Уведомления */
+    .messages { list-style: none; margin-bottom: 24px; }
+    .messages li {
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      font-size: .875rem;
+    }
+    .messages .success { background: #1b3a1b; border-left: 3px solid #4caf50; color: #81c784; }
+    .messages .error   { background: #3a1b1b; border-left: 3px solid #ef5350; color: #ef9a9a; }
+
+    /* Карточки */
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 24px; }
+
+    .card {
+      background: #1a1a1a;
+      border: 1px solid #2a2a2a;
+      border-radius: 12px;
+      padding: 24px;
+    }
+    .card-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #ff6b35;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    label {
+      display: block;
+      font-size: .8rem;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      margin-bottom: 6px;
+      margin-top: 16px;
+    }
+    label:first-of-type { margin-top: 0; }
+
+    input[type=text], input[type=number] {
+      width: 100%;
+      background: #111;
+      border: 1px solid #333;
+      border-radius: 8px;
+      color: #e0e0e0;
+      font-size: .95rem;
+      padding: 10px 14px;
+      outline: none;
+      transition: border-color .2s;
+    }
+    input:focus { border-color: #ff6b35; }
+
+    .checkbox-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 16px;
+    }
+    .checkbox-row input[type=checkbox] { width: 18px; height: 18px; accent-color: #ff6b35; cursor: pointer; }
+    .checkbox-row span { font-size: .95rem; }
+
+    .btn-save {
+      margin-top: 24px;
+      width: 100%;
+      padding: 12px;
+      background: #ff6b35;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background .2s;
+    }
+    .btn-save:hover { background: #e85d2a; }
+
+    /* Подсказка */
+    .hint {
+      font-size: .78rem;
+      color: #555;
+      margin-top: 4px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>⚙️ Настройки Rust+ бота</h1>
+  {% if config %}
+    {% if config.is_active %}
+      <span class="bot-status active"><span class="dot green"></span>Бот активен</span>
+    {% else %}
+      <span class="bot-status inactive"><span class="dot red"></span>Бот отключён</span>
+    {% endif %}
+  {% else %}
+    <span class="bot-status inactive"><span class="dot red"></span>Не настроен</span>
+  {% endif %}
+  <a class="back-link" href="/admin/" style="margin-left: 16px;">← Назад в Admin</a>
+</div>
+
+{% if messages %}
+<ul class="messages">
+  {% for msg in messages %}
+    <li class="{{ msg.tags }}">{{ msg }}</li>
+  {% endfor %}
+</ul>
+{% endif %}
+
+<div class="cards">
+
+  <!-- ─── Форма BotConfig ─────────────────────────────── -->
+  <div class="card">
+    <div class="card-title">🔌 Подключение к серверу</div>
+    <form method="post">
+      {% csrf_token %}
+      <input type="hidden" name="form_type" value="bot_config">
+
+      <label for="ip">IP адрес сервера</label>
+      <input type="text" id="ip" name="ip" placeholder="185.0.0.1"
+             value="{{ config.ip|default:'' }}" required>
+
+      <label for="port">Порт сервера</label>
+      <input type="number" id="port" name="port" placeholder="28017"
+             value="{{ config.port|default:'28017' }}" required>
+
+      <label for="steam_id">Steam ID (64-bit)</label>
+      <input type="number" id="steam_id" name="steam_id" placeholder="76561198XXXXXXXXX"
+             value="{{ config.steam_id|default:'' }}" required>
+      <p class="hint">Steam ID владельца Rust+ бота (64-bit формат)</p>
+
+      <label for="player_token">Rust+ токен</label>
+      <input type="number" id="player_token" name="player_token" placeholder="токен из приложения Rust+"
+             value="{{ config.player_token|default:'' }}" required>
+      <p class="hint">Токен из мобильного приложения Rust+ (настройки → Rust+ токен)</p>
+
+      <div class="checkbox-row">
+        <input type="checkbox" id="is_active" name="is_active"
+               {% if config.is_active %}checked{% endif %}>
+        <span>Включить бота</span>
+      </div>
+
+      <button type="submit" class="btn-save">Сохранить подключение</button>
+    </form>
+  </div>
+
+  <!-- ─── Форма CityZone ─────────────────────────────── -->
+  <div class="card">
+    <div class="card-title">🏙️ Зона City</div>
+    <form method="post">
+      {% csrf_token %}
+      <input type="hidden" name="form_type" value="city_zone">
+
+      <label for="zone_name">Название зоны</label>
+      <input type="text" id="zone_name" name="name" placeholder="City"
+             value="{{ city_zone.name|default:'City' }}">
+
+      <label for="x_min">X минимум</label>
+      <input type="number" id="x_min" name="x_min" step="0.1" placeholder="0"
+             value="{{ city_zone.x_min|default:'0' }}">
+
+      <label for="x_max">X максимум</label>
+      <input type="number" id="x_max" name="x_max" step="0.1" placeholder="1000"
+             value="{{ city_zone.x_max|default:'0' }}">
+
+      <label for="y_min">Y минимум</label>
+      <input type="number" id="y_min" name="y_min" step="0.1" placeholder="0"
+             value="{{ city_zone.y_min|default:'0' }}">
+
+      <label for="y_max">Y максимум</label>
+      <input type="number" id="y_max" name="y_max" step="0.1" placeholder="1000"
+             value="{{ city_zone.y_max|default:'0' }}">
+
+      <p class="hint">Координаты границ зоны City на карте сервера. Используй F1-консоль или карту из Rust+.</p>
+
+      <button type="submit" class="btn-save">Сохранить зону</button>
+    </form>
+  </div>
+
+</div>
+
+<!-- ─── Инструкция ──────────────────────────────────────── -->
+<div class="card" style="margin-top: 24px; max-width: 760px;">
+  <div class="card-title">📋 Как запустить бота</div>
+  <pre style="color: #aaa; font-size:.875rem; line-height:1.6; white-space: pre-wrap;">
+# 1. Установить библиотеку
+pip install rustplus
+
+# 2. Заполнить настройки выше и нажать «Сохранить»
+
+# 3. Запустить бота
+python manage.py run_bot
+
+# Бот будет автоматически переподключаться при обрывах.
+# Для остановки — Ctrl+C
+  </pre>
+</div>
+
+</body>
+</html>

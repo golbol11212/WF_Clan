@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>WF | Вход / Регистрация</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet"></noscript>
 <style>
   :root {
     --void: #020005;
@@ -743,25 +744,50 @@
         <div style="margin-bottom:20px;">
           <span class="role-label">Твоя роль в клане</span>
           <div class="role-cards" id="roleCards">
-            <div class="role-card selected" data-role="raider" onclick="selectRole(this)">
-              <div class="role-card-icon">💣</div>
-              <div class="role-card-name">Raider</div>
-              <div class="role-card-desc">Рейды · C4 · Ракеты</div>
+            <div class="role-card" data-role="leader" onclick="selectRole(this)">
+              <div class="role-card-icon">👑</div>
+              <div class="role-card-name">Лидер</div>
+              <div class="role-card-desc">Руководство · Тактика</div>
             </div>
-            <div class="role-card" data-role="pvp" onclick="selectRole(this)">
-              <div class="role-card-icon">⚔️</div>
-              <div class="role-card-name">PVP / Coller</div>
+            <div class="role-card" data-role="deputy" onclick="selectRole(this)">
+              <div class="role-card-icon">🎖️</div>
+              <div class="role-card-name">Зам</div>
+              <div class="role-card-desc">Замест. · Координация</div>
+            </div>
+            <div class="role-card" data-role="coller" onclick="selectRole(this)">
+              <div class="role-card-icon">🎯</div>
+              <div class="role-card-name">Колер</div>
               <div class="role-card-desc">Контроль · Зачистка</div>
             </div>
             <div class="role-card" data-role="builder" onclick="selectRole(this)">
               <div class="role-card-icon">🔧</div>
-              <div class="role-card-name">Builder</div>
-              <div class="role-card-desc">База · Электрика</div>
+              <div class="role-card-name">Билдер</div>
+              <div class="role-card-desc">База · Строительство</div>
             </div>
-            <div class="role-card" data-role="farmer" onclick="selectRole(this)">
+            <div class="role-card" data-role="electric" onclick="selectRole(this)">
+              <div class="role-card-icon">⚡</div>
+              <div class="role-card-name">Электрик</div>
+              <div class="role-card-desc">Электрика · Ловушки</div>
+            </div>
+            <div class="role-card selected" data-role="farmer" onclick="selectRole(this)">
               <div class="role-card-icon">⛏️</div>
-              <div class="role-card-name">Farmer</div>
+              <div class="role-card-name">Фармер</div>
               <div class="role-card-desc">Ресурсы · Саппорт</div>
+            </div>
+            <div class="role-card" data-role="combater" onclick="selectRole(this)">
+              <div class="role-card-icon">🗡️</div>
+              <div class="role-card-name">Комбатер</div>
+              <div class="role-card-desc">PVP · Боевые операции</div>
+            </div>
+            <div class="role-card" data-role="raider" onclick="selectRole(this)">
+              <div class="role-card-icon">💣</div>
+              <div class="role-card-name">Рейдер</div>
+              <div class="role-card-desc">Рейды · C4 · Ракеты</div>
+            </div>
+            <div class="role-card" data-role="ferm" onclick="selectRole(this)">
+              <div class="role-card-icon">🌾</div>
+              <div class="role-card-name">Фермер</div>
+              <div class="role-card-desc">Сельхоз · Еда</div>
             </div>
           </div>
           <div class="field-err" id="regRoleErr">Выбери роль</div>
@@ -972,7 +998,7 @@ async function handleLogin() {
 }
 
 // ROLE SELECTOR
-let selectedRole = 'raider';
+let selectedRole = 'farmer';
 function selectRole(card) {
   document.querySelectorAll('.role-card').forEach(c => c.classList.remove('selected'));
   card.classList.add('selected');
@@ -1040,6 +1066,7 @@ async function handleRegister() {
       localStorage.setItem('wf_token',      data.token);
       localStorage.setItem('wf_username',   data.username);
       localStorage.setItem('wf_steam_name', data.steam_name || '');
+      localStorage.setItem('wf_avatar',     data.avatar_url || '');
       const steamMsg = data.steam_name ? ' · Steam: ' + data.steam_name : '';
       showAlert('success', 'АККАУНТ СОЗДАН! ДОБРО ПОЖАЛОВАТЬ В WF!' + steamMsg);
       setTimeout(()=>{ window.location.href = '/hub/'; }, 1800);

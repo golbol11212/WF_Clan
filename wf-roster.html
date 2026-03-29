@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>WF | Roster</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet"></noscript>
 <style>
   :root {
     --void: #020005;
@@ -360,10 +361,15 @@
   <button class="filter-btn" data-filter="rank:veteran">Veteran</button>
   <button class="filter-btn" data-filter="rank:member">Member</button>
   <button class="filter-btn" data-filter="rank:recruit">Recruit</button>
-  <button class="filter-btn" data-filter="spec:raider">Raider</button>
-  <button class="filter-btn" data-filter="spec:pvp">PVP</button>
-  <button class="filter-btn" data-filter="spec:builder">Builder</button>
-  <button class="filter-btn" data-filter="spec:farmer">Farmer</button>
+  <button class="filter-btn" data-filter="spec:leader">Лидер</button>
+  <button class="filter-btn" data-filter="spec:deputy">Зам</button>
+  <button class="filter-btn" data-filter="spec:coller">Колер</button>
+  <button class="filter-btn" data-filter="spec:builder">Билдер</button>
+  <button class="filter-btn" data-filter="spec:electric">Электрик</button>
+  <button class="filter-btn" data-filter="spec:farmer">Фармер</button>
+  <button class="filter-btn" data-filter="spec:combater">Комбатер</button>
+  <button class="filter-btn" data-filter="spec:raider">Рейдер</button>
+  <button class="filter-btn" data-filter="spec:ferm">Фермер</button>
 </div>
 
 <!-- ROSTER -->
@@ -406,8 +412,9 @@
     'veteran': 'Veteran', 'member': 'Member', 'recruit': 'Recruit'
   };
   const SPEC_LABEL = {
-    'raider': 'Raider', 'builder': 'Builder / Elec',
-    'pvp': 'PVP / Coller', 'farmer': 'Farmer / Support', 'any': 'Any'
+    'leader': 'Лидер', 'deputy': 'Зам', 'coller': 'Колер',
+    'builder': 'Билдер', 'electric': 'Электрик', 'farmer': 'Фармер',
+    'combater': 'Комбатер', 'raider': 'Рейдер', 'ferm': 'Фермер'
   };
 
   function formatHours(h) {
@@ -522,14 +529,26 @@
   loadRoster();
 
 // ── AUTH NAV ─────────────────────────────────────────────
+function wfLogout(){
+  ['wf_token','wf_username','wf_avatar','wf_steam_name'].forEach(function(k){ localStorage.removeItem(k); });
+  location.reload();
+}
 (function(){
   const token    = localStorage.getItem('wf_token');
   const username = localStorage.getItem('wf_username');
   const el = document.getElementById('nav-auth');
   if(!el) return;
+  el.style.cssText = 'display:flex;align-items:center;gap:8px;';
   if(token && username){
-    el.innerHTML = `<span style="font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:2px;color:var(--purple-bright);border:1px solid rgba(155,48,255,.35);padding:10px 18px;">▶ ${username.toUpperCase()}</span>
-      <button onclick="localStorage.removeItem('wf_token');localStorage.removeItem('wf_username');location.reload();" style="font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:2px;color:var(--text-dim);background:none;border:1px solid rgba(155,48,255,.15);padding:10px 14px;cursor:pointer;transition:color .2s;" onmouseenter="this.style.color='#ff3355'" onmouseleave="this.style.color='var(--text-dim)'">ВЫЙТИ</button>`;
+    const av = localStorage.getItem('wf_avatar') || '';
+    const avHtml = av
+      ? '<img src="' + av + '" style="width:24px;height:24px;border-radius:50%;border:1px solid rgba(155,48,255,.5);object-fit:cover;display:block;">'
+      : '<span style="width:24px;height:24px;border-radius:50%;border:1px solid rgba(155,48,255,.4);background:rgba(75,0,130,.3);display:flex;align-items:center;justify-content:center;font-size:10px;color:#9b30ff;flex-shrink:0;">◈</span>';
+    el.innerHTML =
+      '<a href="/profile/" style="display:flex;align-items:center;gap:8px;font-family:\'Share Tech Mono\',monospace;font-size:11px;letter-spacing:2px;color:#bf5fff;text-decoration:none;padding:8px 14px;">'
+      + avHtml + ' ▶ ' + username.toUpperCase()
+      + '</a>'
+      + '<button onclick="wfLogout()" style="font-family:\'Share Tech Mono\',monospace;font-size:11px;letter-spacing:2px;color:#7a6d8a;background:none;border:1px solid rgba(155,48,255,.15);padding:8px 14px;cursor:pointer;transition:color .2s;" onmouseenter="this.style.color=\'#ff3355\'" onmouseleave="this.style.color=\'#7a6d8a\'">ВЫЙТИ</button>';
   } else {
     el.innerHTML = '<a href="/auth/" class="nav-login">ВОЙТИ</a>';
   }

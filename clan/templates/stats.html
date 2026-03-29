@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WF | Stats</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet"></noscript>
+<style>
+:root {
+  --void: #020005;
+  --obsidian: #0a0010;
+  --deep: #0d0018;
+  --purple-core: #4B0082;
+  --purple-glow: #6a00b8;
+  --purple-neon: #9b30ff;
+  --purple-bright: #bf5fff;
+  --ember: #ff4500;
+  --text-primary: #e8ddf5;
+  --text-dim: #7a6d8a;
+  --glass-bg: rgba(15,0,25,0.6);
+  --glass-border: rgba(155,48,255,0.2);
+  --online: #00ff88;
+  --offline: #ff3355;
+}
+
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--void);
+  color:var(--text-primary);
+  font-family:'Rajdhani',sans-serif;
+  overflow-x:hidden;
+  cursor:none;
+  min-height:100vh;
+}
+
+/* ── CURSOR ─────────────────────────────────────────────── */
+#cur{position:fixed;width:8px;height:8px;background:var(--purple-neon);border-radius:50%;pointer-events:none;z-index:9999;box-shadow:0 0 10px var(--purple-neon),0 0 20px var(--purple-core);transition:transform .1s;}
+#curR{position:fixed;width:28px;height:28px;border:1px solid rgba(155,48,255,.5);border-radius:50%;pointer-events:none;z-index:9998;transition:all .08s linear;}
+
+/* ── NOISE ───────────────────────────────────────────────── */
+body::before{
+  content:'';position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  opacity:.025;pointer-events:none;z-index:0;
+}
+
+/* ── NAV ─────────────────────────────────────────────────── */
+nav{
+  position:fixed;top:0;left:0;right:0;
+  height:64px;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 48px;
+  background:rgba(2,0,5,.85);
+  border-bottom:1px solid rgba(75,0,130,.25);
+  backdrop-filter:blur(20px);
+  z-index:100;
+}
+.nav-logo{
+  display:flex;align-items:center;
+  text-decoration:none;
+  font-family:'Bebas Neue',sans-serif;
+  font-size:26px;letter-spacing:5px;
+  color:var(--purple-bright);
+  text-shadow:0 0 20px var(--purple-neon);
+}
+.nav-links{display:flex;gap:0;list-style:none;}
+.nav-links a{
+  font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:3px;text-transform:uppercase;
+  color:var(--text-dim);text-decoration:none;padding:8px 20px;
+  transition:color .25s;position:relative;
+}
+.nav-links a:hover{color:var(--purple-bright);}
+.nav-links a.active{color:var(--purple-neon);}
+.nav-links a.active::after{
+  content:'';position:absolute;bottom:0;left:20px;right:20px;height:1px;
+  background:var(--purple-neon);box-shadow:0 0 8px var(--purple-neon);
+}
+.nav-hub{color:var(--purple-neon) !important;}
+.nav-cta{
+  font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:3px;text-transform:uppercase;
+  color:var(--purple-neon);border:1px solid var(--purple-core);
+  padding:8px 20px;text-decoration:none;transition:all .3s;
+  clip-path:polygon(8px 0%,100% 0%,calc(100% - 8px) 100%,0% 100%);
+  background:rgba(75,0,130,.1);
+}
+.nav-cta:hover{background:var(--purple-core);color:#fff;box-shadow:0 0 24px rgba(75,0,130,.7);}
+
+/* ── HERO ────────────────────────────────────────────────── */
+.page-hero{
+  position:relative;padding:140px 60px 60px;
+  text-align:center;overflow:hidden;
+}
+.page-hero::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(75,0,130,.25) 0%,transparent 70%);
+  pointer-events:none;
+}
+.hero-label{
+  font-family:'Share Tech Mono',monospace;font-size:10px;
+  letter-spacing:6px;color:var(--purple-neon);text-transform:uppercase;
+  margin-bottom:14px;opacity:.8;
+}
+.hero-title{
+  font-family:'Bebas Neue',sans-serif;font-size:clamp(64px,10vw,110px);
+  letter-spacing:10px;line-height:1;
+  background:linear-gradient(135deg,#fff 0%,var(--purple-bright) 50%,var(--purple-neon) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  filter:drop-shadow(0 0 40px rgba(155,48,255,.5));
+  margin-bottom:16px;
+}
+.hero-sub{
+  font-family:'Share Tech Mono',monospace;font-size:12px;letter-spacing:2px;
+  color:var(--text-dim);max-width:480px;margin:0 auto;
+}
+.hero-line{
+  width:120px;height:1px;margin:24px auto 0;
+  background:linear-gradient(90deg,transparent,var(--purple-neon),transparent);
+  box-shadow:0 0 12px var(--purple-neon);
+}
+
+/* ── SUMMARY BAR ──────────────────────────────────────────── */
+.summary{
+  display:flex;gap:40px;justify-content:center;flex-wrap:wrap;
+  padding:0 60px 48px;
+}
+.summary-item{
+  font-family:'Share Tech Mono',monospace;font-size:10px;
+  letter-spacing:2px;color:var(--text-dim);
+  display:flex;align-items:center;gap:8px;
+}
+.summary-item .val{color:var(--purple-neon);font-size:15px;font-weight:700;}
+.summary-dot{width:6px;height:6px;border-radius:50%;background:var(--purple-neon);box-shadow:0 0 8px var(--purple-neon);}
+
+/* ── TABLE SECTION ───────────────────────────────────────── */
+.stats-section{padding:0 60px 100px;max-width:1400px;margin:0 auto;}
+
+.section-label{
+  font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:4px;
+  color:var(--purple-neon);text-transform:uppercase;
+  display:flex;align-items:center;gap:16px;margin-bottom:24px;
+}
+.section-label::before{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--purple-core),transparent);}
+.section-label::after{content:'';flex:1;height:1px;background:linear-gradient(270deg,var(--purple-core),transparent);}
+
+/* Player Row Cards */
+.player-list{display:flex;flex-direction:column;gap:8px;}
+
+.player-row{
+  display:grid;
+  grid-template-columns: 28px 1fr 80px 110px 110px 90px 70px 100px;
+  align-items:center;gap:16px;
+  padding:18px 24px;
+  background:var(--glass-bg);
+  border:1px solid var(--glass-border);
+  position:relative;overflow:hidden;
+  transition:border-color .3s,transform .25s,box-shadow .25s;
+  clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,14px 100%,0 calc(100% - 14px));
+  animation:fadeInUp .35s ease backwards;
+}
+.player-row:hover{
+  border-color:rgba(155,48,255,.5);
+  transform:translateX(4px);
+  box-shadow:0 4px 32px rgba(75,0,130,.25);
+}
+.player-row::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:2px;
+  background:linear-gradient(180deg,transparent,var(--purple-neon),transparent);
+  opacity:0;transition:opacity .3s;
+}
+.player-row:hover::before{opacity:1;}
+
+/* Online row highlight */
+.player-row.is-online{
+  background:rgba(0,255,136,.03);
+  border-color:rgba(0,255,136,.15);
+}
+.player-row.is-online::before{
+  background:linear-gradient(180deg,transparent,var(--online),transparent);
+  opacity:.6;
+}
+
+/* ── ROW CELLS ───────────────────────────────────────────── */
+.cell-num{
+  font-family:'Share Tech Mono',monospace;font-size:10px;
+  color:rgba(155,48,255,.4);letter-spacing:1px;
+}
+
+.cell-player{display:flex;align-items:center;gap:12px;min-width:0;}
+.status-dot{
+  width:8px;height:8px;border-radius:50%;flex-shrink:0;
+}
+.status-dot.online {background:var(--online);box-shadow:0 0 8px var(--online);}
+.status-dot.offline{background:rgba(155,48,255,.2);}
+
+.player-name{
+  font-family:'Bebas Neue',sans-serif;font-size:19px;letter-spacing:2px;
+  color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  line-height:1;
+}
+.player-steam{
+  font-family:'Share Tech Mono',monospace;font-size:9px;
+  color:rgba(155,48,255,.35);letter-spacing:1px;margin-top:1px;
+}
+
+.cell-label{
+  font-family:'Share Tech Mono',monospace;font-size:9px;
+  letter-spacing:2px;color:var(--text-dim);text-transform:uppercase;
+  margin-bottom:2px;
+}
+.cell-val{
+  font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:1px;
+  color:var(--text-primary);line-height:1;
+}
+.cell-val.accent{color:var(--purple-bright);}
+.cell-val.danger{color:#ff5566;text-shadow:0 0 8px rgba(255,50,80,.3);}
+.cell-val.dim{color:var(--text-dim);}
+
+.cell-status{text-align:center;}
+.badge-online{
+  font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;
+  color:var(--online);border:1px solid rgba(0,255,136,.3);
+  padding:3px 10px;
+  clip-path:polygon(4px 0%,100% 0%,calc(100% - 4px) 100%,0% 100%);
+  background:rgba(0,255,136,.05);
+  box-shadow:0 0 10px rgba(0,255,136,.1);
+}
+.badge-offline{
+  font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;
+  color:var(--text-dim);border:1px solid rgba(155,48,255,.1);
+  padding:3px 10px;
+  clip-path:polygon(4px 0%,100% 0%,calc(100% - 4px) 100%,0% 100%);
+}
+
+.cell-death{display:flex;flex-direction:column;gap:2px;}
+.death-grid{
+  font-family:'Share Tech Mono',monospace;font-size:13px;letter-spacing:1px;
+  color:#ff6677;
+}
+.death-time{
+  font-family:'Share Tech Mono',monospace;font-size:9px;
+  color:var(--text-dim);letter-spacing:1px;
+}
+
+/* ── HEADER ROW ──────────────────────────────────────────── */
+.table-head{
+  display:grid;
+  grid-template-columns: 28px 1fr 80px 110px 110px 90px 70px 100px;
+  align-items:center;gap:16px;
+  padding:8px 24px 12px;
+}
+.th{
+  font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:3px;
+  color:rgba(155,48,255,.4);text-transform:uppercase;
+}
+
+/* ── EMPTY STATE ─────────────────────────────────────────── */
+.empty-state{
+  text-align:center;padding:100px 20px;
+}
+.empty-title{
+  font-family:'Bebas Neue',sans-serif;font-size:36px;letter-spacing:4px;
+  color:var(--text-dim);margin-bottom:12px;
+}
+.empty-sub{
+  font-family:'Share Tech Mono',monospace;font-size:11px;
+  letter-spacing:2px;color:rgba(155,48,255,.4);
+}
+.empty-cmd{
+  display:inline-block;margin-top:20px;
+  font-family:'Share Tech Mono',monospace;font-size:12px;letter-spacing:2px;
+  color:var(--purple-neon);border:1px solid rgba(155,48,255,.3);
+  padding:10px 24px;background:rgba(75,0,130,.1);
+  clip-path:polygon(8px 0%,100% 0%,calc(100% - 8px) 100%,0% 100%);
+}
+
+/* ── FOOTER ──────────────────────────────────────────────── */
+footer{
+  text-align:center;padding:40px;
+  border-top:1px solid rgba(75,0,130,.1);
+  font-family:'Share Tech Mono',monospace;font-size:10px;
+  letter-spacing:3px;color:var(--text-dim);text-transform:uppercase;
+}
+footer a{color:var(--purple-neon);text-decoration:none;}
+footer a:hover{text-shadow:0 0 8px var(--purple-neon);}
+
+/* ── ANIMATIONS ──────────────────────────────────────────── */
+@keyframes fadeInUp{
+  from{opacity:0;transform:translateY(16px);}
+  to{opacity:1;transform:translateY(0);}
+}
+
+/* ── RESPONSIVE ──────────────────────────────────────────── */
+@media(max-width:1100px){
+  .player-row,.table-head{
+    grid-template-columns: 28px 1fr 80px 110px 110px 90px 70px;
+  }
+  .cell-death,.th:last-child{display:none;}
+}
+@media(max-width:800px){
+  nav{padding:0 24px;}
+  .nav-links{display:none;}
+  .page-hero{padding:110px 24px 48px;}
+  .stats-section{padding:0 20px 80px;}
+  .summary{padding:0 24px 40px;gap:24px;}
+  .player-row,.table-head{
+    grid-template-columns: 28px 1fr 80px 100px 90px;
+  }
+  .cell-afk,.th:nth-child(6),.cell-status,.th:nth-child(3){display:none;}
+}
+@media(max-width:520px){
+  .player-row,.table-head{grid-template-columns:20px 1fr 90px 80px;}
+  .cell-city,.th:nth-child(5){display:none;}
+  .cell-num{display:none;}
+}
+</style>
+</head>
+<body>
+
+<div id="cur"></div>
+<div id="curR"></div>
+
+<!-- NAV -->
+<nav>
+  <a href="/" class="nav-logo">WF</a>
+  <ul class="nav-links">
+    <li><a href="/#about">About Us</a></li>
+    <li><a href="/#recruitment">Recruitment</a></li>
+    <li><a href="/roster/">Roster</a></li>
+    <li><a href="/wipe/">Wipe</a></li>
+    <li><a href="/stats/" class="active">Stats</a></li>
+    <li><a href="/hub/" class="nav-hub">WF HUB</a></li>
+  </ul>
+  <a href="/#recruitment" class="nav-cta">Apply Now</a>
+</nav>
+
+<!-- HERO -->
+<section class="page-hero">
+  <p class="hero-label">Rust+ Tracker</p>
+  <h1 class="hero-title">STATS</h1>
+  <p class="hero-sub">Онлайн-статистика команды — время в игре, City, смерти</p>
+  <div class="hero-line"></div>
+</section>
+
+{% if players %}
+<!-- SUMMARY BAR -->
+<div class="summary">
+  <div class="summary-item">
+    <span class="summary-dot"></span>
+    <span class="val">{{ players|length }}</span> TRACKED
+  </div>
+  {% with online=0 %}
+  <div class="summary-item">
+    <span style="width:6px;height:6px;border-radius:50%;background:#00ff88;box-shadow:0 0 8px #00ff88;flex-shrink:0;"></span>
+    <span class="val" id="online-count">—</span> ONLINE
+  </div>
+  {% endwith %}
+  <div class="summary-item">
+    <span class="summary-dot" style="background:rgba(155,48,255,.3);box-shadow:none;"></span>
+    Auto-refresh every 30s
+  </div>
+</div>
+
+<!-- TABLE -->
+<section class="stats-section">
+  <div class="section-label">PLAYER ACTIVITY LOG</div>
+
+  <!-- Header -->
+  <div class="table-head">
+    <span class="th">#</span>
+    <span class="th">Player</span>
+    <span class="th">Status</span>
+    <span class="th">Online</span>
+    <span class="th">City</span>
+    <span class="th">AFK</span>
+    <span class="th">Deaths</span>
+    <span class="th">Last Death</span>
+  </div>
+
+  <!-- Rows -->
+  <div class="player-list">
+    {% for item in players %}
+    <div class="player-row {% if item.player.is_online %}is-online{% endif %}"
+         style="animation-delay: {{ forloop.counter0 }}0ms">
+
+      <!-- # -->
+      <span class="cell-num">{{ forloop.counter }}</span>
+
+      <!-- Player -->
+      <div class="cell-player">
+        <span class="status-dot {% if item.player.is_online %}online{% else %}offline{% endif %}"></span>
+        <div>
+          <div class="player-name">{{ item.player.name }}</div>
+          <div class="player-steam">{{ item.player.steam_id }}</div>
+        </div>
+      </div>
+
+      <!-- Status -->
+      <div class="cell-status">
+        {% if item.player.is_online %}
+          <span class="badge-online">ONLINE</span>
+        {% else %}
+          <span class="badge-offline">
+            {% if item.player.last_seen %}{{ item.player.last_seen|date:"d.m" }}{% else %}—{% endif %}
+          </span>
+        {% endif %}
+      </div>
+
+      <!-- Online time -->
+      <div>
+        <div class="cell-label">Online</div>
+        <div class="cell-val accent">{{ item.fmt_online }}</div>
+      </div>
+
+      <!-- City time -->
+      <div class="cell-city">
+        <div class="cell-label">City</div>
+        <div class="cell-val">{{ item.fmt_city }}</div>
+      </div>
+
+      <!-- AFK -->
+      <div class="cell-afk">
+        <div class="cell-label">AFK</div>
+        <div class="cell-val dim">{{ item.fmt_afk }}</div>
+      </div>
+
+      <!-- Deaths -->
+      <div>
+        <div class="cell-label">Deaths</div>
+        <div class="cell-val {% if item.deaths_count > 0 %}danger{% else %}dim{% endif %}">
+          {{ item.deaths_count }}
+        </div>
+      </div>
+
+      <!-- Last death -->
+      <div class="cell-death">
+        {% if item.last_death %}
+          <span class="death-grid">{{ item.last_death.grid_square }}</span>
+          <span class="death-time">{{ item.last_death.timestamp|date:"d.m H:i" }}</span>
+        {% else %}
+          <span class="cell-val dim">—</span>
+        {% endif %}
+      </div>
+
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+{% else %}
+<!-- EMPTY STATE -->
+<section class="stats-section">
+  <div class="empty-state">
+    <div class="empty-title">No data yet</div>
+    <p class="empty-sub">Start the bot to begin collecting statistics</p>
+    <div class="empty-cmd">python manage.py run_bot</div>
+  </div>
+</section>
+{% endif %}
+
+<footer>
+  WF CLAN &nbsp;·&nbsp; <a href="/api/player-stats/">JSON API</a> &nbsp;·&nbsp; <a href="/admin/">Admin</a>
+</footer>
+
+<script>
+// Custom cursor
+const cur = document.getElementById('cur');
+const curR = document.getElementById('curR');
+document.addEventListener('mousemove', e => {
+  cur.style.left  = e.clientX - 4  + 'px';
+  cur.style.top   = e.clientY - 4  + 'px';
+  curR.style.left = e.clientX - 14 + 'px';
+  curR.style.top  = e.clientY - 14 + 'px';
+});
+
+// Count online players
+const rows = document.querySelectorAll('.player-row.is-online');
+const el = document.getElementById('online-count');
+if (el) el.textContent = rows.length;
+
+// Auto-refresh every 30 seconds
+setTimeout(() => location.reload(), 30000);
+</script>
+
+</body>
+</html>

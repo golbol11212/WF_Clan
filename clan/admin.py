@@ -1,8 +1,8 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
-from .models import Application, Member, WipePost, UserProfile
-from .views import send_wipe_webhook, send_roster_webhook
+from .models import Application, Member, WipePost, UserProfile, Server, Video, BotConfig, CityZone, Player, Death
+from .views import send_wipe_webhook, send_roster_webhook, fetch_video_meta
 
 admin.site.unregister(User)
 
@@ -122,6 +122,95 @@ class WipePostAdmin(admin.ModelAdmin):
             WipePost.objects.filter(pk=obj.pk).update(discord_message_id=new_message_id)
 
 
+# ── Серверы ──────────────────────────────────────────────────
+
+@admin.register(Server)
+class ServerAdmin(admin.ModelAdmin):
+    list_display  = ['name', 'type', 'status', 'players', 'max_players', 'ping', 'wipe_day', 'region', 'is_active', 'order']
+    list_editable = ['status', 'players', 'ping', 'is_active', 'order']
+    list_filter   = ['type', 'status', 'is_active']
+    search_fields = ['name', 'region']
+    ordering      = ['order', 'name']
+    fieldsets = (
+        (None, {
+            'fields': ('name', 'type', 'status', 'is_active', 'order'),
+        }),
+        ('Статистика', {
+            'fields': ('players', 'max_players', 'ping', 'wipe_day', 'region'),
+        }),
+    )
+
+
+# ── Видео ─────────────────────────────────────────────────────
+
+@admin.register(Video)
+class VideoAdmin(admin.ModelAdmin):
+    list_display  = ['title', 'category', 'duration', 'views', 'date', 'is_active', 'order']
+    list_editable = ['category', 'is_active', 'order']
+    list_filter   = ['category', 'is_active']
+    search_fields = ['title']
+    ordering      = ['order', '-id']
+    actions       = ['refresh_meta']
+    fieldsets = (
+        (None, {
+            'fields': ('url', 'title', 'category', 'is_active', 'order'),
+            'description': (
+                '⚡ Вставь ссылку на YouTube/TikTok и сохрани — название подтянется автоматически. '
+                'Для просмотров, длительности и даты нужен <b>YOUTUBE_API_KEY</b> в settings.py.'
+            ),
+        }),
+        ('Мета (заполняется автоматически)', {
+            'fields': ('thumbnail_url', 'duration', 'views', 'date'),
+        }),
+    )
+
+    def get_form(self, request, obj=None, **kwargs):
+        form = super().get_form(request, obj, **kwargs)
+        form.base_fields['title'].required = False
+        return form
+
+    def save_model(self, request, obj, form, change):
+        should_fetch = obj.url and (
+            'url' in form.changed_data   # URL только что изменился
+            or not obj.title             # нет названия
+            or not obj.duration          # нет длительности
+        )
+        if should_fetch:
+            meta = fetch_video_meta(obj.url)
+            if meta['title']:
+                obj.title = meta['title']
+            if meta['duration']:
+                obj.duration = meta['duration']
+            if meta['views']:
+                obj.views = meta['views']
+            if meta['date']:
+                obj.date = meta['date']
+            if meta['thumbnail_url'] and not obj.thumbnail_url:
+                obj.thumbnail_url = meta['thumbnail_url']
+            if meta['title']:
+                self.message_user(request, f'✅ Метаданные подтянуты: {meta["title"][:80]}')
+            elif not obj.title:
+                obj.title = obj.url  # fallback если fetch не сработал
+        super().save_model(request, obj, form, change)
+
+    @admin.action(description='🔄 Обновить метаданные из ссылки')
+    def refresh_meta(self, request, queryset):
+        updated = 0
+        for obj in queryset:
+            if not obj.url:
+                continue
+            meta = fetch_video_meta(obj.url)
+            changed = False
+            for field in ('title', 'duration', 'views', 'date', 'thumbnail_url'):
+                if meta[field]:
+                    setattr(obj, field, meta[field])
+                    changed = True
+            if changed:
+                obj.save()
+                updated += 1
+        self.message_user(request, f'Обновлено {updated} видео.')
+
+
 # ── Заявки ───────────────────────────────────────────────────
 
 @admin.register(Application)
@@ -130,3 +219,79 @@ class ApplicationAdmin(admin.ModelAdmin):
     list_filter     = ['role', 'region']
     search_fields   = ['steam_name', 'discord_tag']
     readonly_fields = ['steam_name', 'discord_tag', 'hours', 'region', 'role', 'reason', 'created_at']
+
+
+# ── Rust+ бот ─────────────────────────────────────────────
+
+@admin.register(BotConfig)
+class BotConfigAdmin(admin.ModelAdmin):
+    """Настройки подключения бота. Можно создать несколько для разных серверов."""
+    list_display  = ('name', 'ip', 'port', 'steam_id', 'is_active', 'updated_at')
+    list_editable = ('is_active',)
+    fieldsets = (
+        ('Название', {
+            'fields': ('name',),
+        }),
+        ('Подключение к серверу', {
+            'fields': ('ip', 'port', 'steam_id', 'player_token'),
+        }),
+        ('Статус', {
+            'fields': ('is_active',),
+        }),
+    )
+
+
+@admin.register(CityZone)
+class CityZoneAdmin(admin.ModelAdmin):
+    """Зона City на карте сервера."""
+    list_display = ('name', 'server', 'x_min', 'x_max', 'y_min', 'y_max')
+
+
+@admin.register(Player)
+class PlayerAdmin(admin.ModelAdmin):
+    """Игроки, отслеживаемые ботом."""
+    list_display  = ('name', 'steam_id', 'is_online', 'fmt_online', 'fmt_city', 'fmt_afk', 'last_seen')
+    list_filter   = ('is_online',)
+    search_fields = ('name', 'steam_id')
+    readonly_fields = (
+        'last_seen', 'session_start', 'is_online',
+        'total_online_seconds', 'total_city_seconds', 'total_afk_seconds',
+        'last_x', 'last_y', 'last_move_time',
+    )
+
+    def get_readonly_fields(self, request, obj=None):
+        # При редактировании существующего игрока steam_id тоже readonly
+        if obj:
+            return self.readonly_fields + ('steam_id',)
+        return self.readonly_fields
+
+    @admin.display(description='Онлайн')
+    def fmt_online(self, obj):
+        return _fmt_time_admin(obj.total_online_seconds)
+
+    @admin.display(description='Время в City')
+    def fmt_city(self, obj):
+        return _fmt_time_admin(obj.total_city_seconds)
+
+    @admin.display(description='АФК')
+    def fmt_afk(self, obj):
+        return _fmt_time_admin(obj.total_afk_seconds)
+
+
+@admin.register(Death)
+class DeathAdmin(admin.ModelAdmin):
+    """Смерти игроков."""
+    list_display    = ('player', 'timestamp', 'grid_square', 'x', 'y', 'map_size')
+    list_filter     = ('player',)
+    date_hierarchy  = 'timestamp'
+    readonly_fields = ('player', 'timestamp', 'x', 'y', 'grid_square', 'map_size')
+
+
+def _fmt_time_admin(seconds):
+    """Вспомогательная функция форматирования времени для Admin."""
+    if seconds < 60:
+        return f'{seconds}с'
+    elif seconds < 3600:
+        return f'{seconds // 60}м'
+    else:
+        return f'{seconds // 3600}ч {(seconds % 3600) // 60}м'

@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>WF | Wipe Info</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet"></noscript>
 <style>
   :root {
     --void: #020005;
@@ -144,11 +145,15 @@
   .squad-spec { font-family: 'Share Tech Mono', monospace; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-dim); margin-top: 2px; }
 
   /* SPEC COLOR */
-  .spec-raider  { color: #ff6644; }
-  .spec-pvp     { color: #ff4488; }
-  .spec-builder { color: #44aaff; }
-  .spec-farmer  { color: #88dd44; }
-  .spec-any     { color: var(--text-dim); }
+  .spec-leader   { color: #ffd700; }
+  .spec-deputy   { color: #c0c0c0; }
+  .spec-coller   { color: #ff4488; }
+  .spec-builder  { color: #44aaff; }
+  .spec-electric { color: #ffee00; }
+  .spec-farmer   { color: #88dd44; }
+  .spec-combater { color: #ff6644; }
+  .spec-raider   { color: #ff3300; }
+  .spec-ferm     { color: #aad450; }
 
   /* ─── ARCHIVE ─── */
   .archive-list { display: flex; flex-direction: column; gap: 8px; }
@@ -258,7 +263,7 @@ document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; })
 })();
 
 // ── HELPERS ──────────────────────────────────────────────────
-const SPEC_LABEL = { raider: 'Raider', pvp: 'PVP / Coller', builder: 'Builder / Elec', farmer: 'Farmer / Support', any: 'Any' };
+const SPEC_LABEL = { leader: 'Лидер', deputy: 'Зам', coller: 'Колер', builder: 'Билдер', electric: 'Электрик', farmer: 'Фармер', combater: 'Комбатер', raider: 'Рейдер', ferm: 'Фермер' };
 const RANK_LABEL = { leader: 'Leader', 'co-leader': 'Co-Leader', veteran: 'Veteran', member: 'Member', recruit: 'Recruit' };
 
 function fmtDate(iso) {
@@ -490,14 +495,26 @@ async function loadWipe() {
 loadWipe();
 
 // ── AUTH NAV ─────────────────────────────────────────────
+function wfLogout(){
+  ['wf_token','wf_username','wf_avatar','wf_steam_name'].forEach(function(k){ localStorage.removeItem(k); });
+  location.reload();
+}
 (function(){
   const token    = localStorage.getItem('wf_token');
   const username = localStorage.getItem('wf_username');
   const el = document.getElementById('nav-auth');
   if(!el) return;
+  el.style.cssText = 'display:flex;align-items:center;gap:8px;';
   if(token && username){
-    el.innerHTML = `<span style="font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:2px;color:var(--purple-bright);border:1px solid rgba(155,48,255,.35);padding:10px 18px;">▶ ${username.toUpperCase()}</span>
-      <button onclick="localStorage.removeItem('wf_token');localStorage.removeItem('wf_username');location.reload();" style="font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:2px;color:var(--text-dim);background:none;border:1px solid rgba(155,48,255,.15);padding:10px 14px;cursor:pointer;transition:color .2s;" onmouseenter="this.style.color='#ff3355'" onmouseleave="this.style.color='var(--text-dim)'">ВЫЙТИ</button>`;
+    const av = localStorage.getItem('wf_avatar') || '';
+    const avHtml = av
+      ? '<img src="' + av + '" style="width:24px;height:24px;border-radius:50%;border:1px solid rgba(155,48,255,.5);object-fit:cover;display:block;">'
+      : '<span style="width:24px;height:24px;border-radius:50%;border:1px solid rgba(155,48,255,.4);background:rgba(75,0,130,.3);display:flex;align-items:center;justify-content:center;font-size:10px;color:#9b30ff;flex-shrink:0;">◈</span>';
+    el.innerHTML =
+      '<a href="/profile/" style="display:flex;align-items:center;gap:8px;font-family:\'Share Tech Mono\',monospace;font-size:11px;letter-spacing:2px;color:#bf5fff;text-decoration:none;padding:8px 14px;">'
+      + avHtml + ' ▶ ' + username.toUpperCase()
+      + '</a>'
+      + '<button onclick="wfLogout()" style="font-family:\'Share Tech Mono\',monospace;font-size:11px;letter-spacing:2px;color:#7a6d8a;background:none;border:1px solid rgba(155,48,255,.15);padding:8px 14px;cursor:pointer;transition:color .2s;" onmouseenter="this.style.color=\'#ff3355\'" onmouseleave="this.style.color=\'#7a6d8a\'">ВЫЙТИ</button>';
   } else {
     el.innerHTML = '<a href="/auth/" class="nav-login">ВОЙТИ</a>';
   }

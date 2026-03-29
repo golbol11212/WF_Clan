@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>WF HUB | Wasteland Forsaken</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet"></noscript>
 <style>
 :root {
   --void: #020005;
@@ -577,6 +578,152 @@ footer{
 .orb2{width:400px;height:400px;background:var(--purple-glow);bottom:-80px;right:-80px;animation-delay:-6s;}
 @keyframes orbFloat{0%,100%{transform:translate(0,0)}50%{transform:translate(30px,-20px)}}
 
+/* ── PROFILE MODAL ───────────────────────────────────────── */
+.profile-trigger{
+  display:flex;align-items:center;gap:10px;
+  font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;
+  color:var(--purple-bright);
+  border:1px solid rgba(155,48,255,.35);padding:6px 14px;
+  background:rgba(75,0,130,.08);
+  cursor:none;transition:all .25s;
+  clip-path:polygon(6px 0%,100% 0%,calc(100% - 6px) 100%,0% 100%);
+}
+.profile-trigger:hover{border-color:rgba(155,48,255,.7);background:rgba(75,0,130,.2);}
+.profile-trigger img{
+  width:24px;height:24px;border-radius:50%;
+  border:1px solid rgba(155,48,255,.5);
+  object-fit:cover;
+}
+.profile-trigger .profile-avatar-placeholder{
+  width:24px;height:24px;border-radius:50%;
+  border:1px solid rgba(155,48,255,.4);
+  background:rgba(75,0,130,.3);
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;color:var(--purple-neon);
+}
+
+/* Overlay */
+.modal-overlay{
+  display:none;position:fixed;inset:0;
+  background:rgba(2,0,5,.8);backdrop-filter:blur(6px);
+  z-index:1000;align-items:center;justify-content:center;
+}
+.modal-overlay.open{display:flex;}
+
+/* Modal box */
+.profile-modal{
+  width:480px;max-width:calc(100vw - 40px);
+  background:var(--deep);
+  border:1px solid rgba(155,48,255,.3);
+  position:relative;
+  box-shadow:0 0 80px rgba(75,0,130,.4);
+  animation:modalIn .3s ease;
+}
+@keyframes modalIn{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:none}}
+
+.pm-header{
+  display:flex;align-items:center;gap:20px;
+  padding:28px 32px 24px;
+  border-bottom:1px solid rgba(155,48,255,.12);
+}
+.pm-avatar-wrap{position:relative;flex-shrink:0;}
+.pm-avatar{
+  width:72px;height:72px;border-radius:50%;
+  border:2px solid rgba(155,48,255,.5);
+  object-fit:cover;
+  background:rgba(75,0,130,.3);
+  display:block;
+}
+.pm-avatar-placeholder{
+  width:72px;height:72px;border-radius:50%;
+  border:2px solid rgba(155,48,255,.3);
+  background:rgba(75,0,130,.15);
+  display:flex;align-items:center;justify-content:center;
+  font-size:28px;color:rgba(155,48,255,.4);
+}
+.pm-steam-badge{
+  position:absolute;bottom:-2px;right:-2px;
+  width:22px;height:22px;border-radius:50%;
+  background:#171a21;border:2px solid rgba(155,48,255,.4);
+  display:flex;align-items:center;justify-content:center;
+}
+.pm-names{}
+.pm-username{
+  font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:3px;
+  color:var(--text-primary);line-height:1;
+}
+.pm-steamname{
+  font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;
+  color:var(--purple-neon);margin-top:4px;
+}
+.pm-steamname:empty::before{content:'Steam не привязан';color:var(--text-dim);}
+.pm-close{
+  position:absolute;top:16px;right:18px;
+  width:28px;height:28px;
+  background:none;border:1px solid rgba(155,48,255,.2);
+  color:var(--text-dim);cursor:none;font-size:14px;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .2s;
+}
+.pm-close:hover{border-color:var(--ember);color:var(--ember);}
+
+.pm-body{padding:24px 32px;}
+.pm-label{
+  font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:3px;
+  color:var(--text-dim);margin-bottom:8px;text-transform:uppercase;display:block;
+}
+.pm-input{
+  width:100%;
+  font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:1px;
+  background:rgba(15,0,25,.7);border:1px solid rgba(155,48,255,.2);
+  color:var(--text-primary);padding:10px 14px;
+  transition:border-color .25s;outline:none;
+  clip-path:polygon(4px 0%,100% 0%,calc(100% - 4px) 100%,0% 100%);
+}
+.pm-input:focus{border-color:rgba(155,48,255,.6);}
+.pm-select{
+  width:100%;appearance:none;
+  font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:1px;
+  background:rgba(15,0,25,.7);border:1px solid rgba(155,48,255,.2);
+  color:var(--text-primary);padding:10px 14px;
+  cursor:none;outline:none;
+  clip-path:polygon(4px 0%,100% 0%,calc(100% - 4px) 100%,0% 100%);
+}
+.pm-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.pm-field{margin-bottom:20px;}
+
+.pm-steam-row{display:flex;gap:8px;}
+.pm-steam-row .pm-input{flex:1;}
+.pm-steam-fetch{
+  font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:2px;
+  padding:0 14px;
+  background:rgba(75,0,130,.2);border:1px solid rgba(155,48,255,.25);
+  color:var(--purple-bright);cursor:none;transition:all .25s;white-space:nowrap;
+}
+.pm-steam-fetch:hover{background:rgba(75,0,130,.4);border-color:var(--purple-neon);}
+
+.pm-footer{
+  padding:0 32px 28px;
+  display:flex;gap:10px;align-items:center;
+}
+.pm-save{
+  flex:1;
+  font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:3px;
+  padding:12px;
+  background:linear-gradient(135deg,var(--purple-core),var(--purple-glow));
+  border:1px solid var(--purple-neon);color:#fff;cursor:none;
+  transition:all .3s;
+  clip-path:polygon(8px 0%,100% 0%,calc(100% - 8px) 100%,0% 100%);
+}
+.pm-save:hover{box-shadow:0 0 24px rgba(75,0,130,.7);}
+.pm-save:disabled{opacity:.5;}
+.pm-msg{
+  font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:1px;
+  min-height:18px;
+}
+.pm-msg.ok{color:#00ff88;}
+.pm-msg.err{color:var(--ember);}
+
 /* ── RESPONSIVE ──────────────────────────────────────────── */
 @media(max-width:1024px){
   .ach-grid{grid-template-columns:repeat(2,1fr);}
@@ -777,6 +924,53 @@ footer{
 
 </div>
 
+<!-- PROFILE MODAL -->
+<div class="modal-overlay" id="profile-overlay" onclick="closeProfileModal(event)">
+  <div class="profile-modal">
+    <div class="pm-header">
+      <div class="pm-avatar-wrap" id="pm-avatar-wrap">
+        <div class="pm-avatar-placeholder">◈</div>
+      </div>
+      <div class="pm-names">
+        <div class="pm-username" id="pm-username"></div>
+        <div class="pm-steamname" id="pm-steamname"></div>
+      </div>
+      <button class="pm-close" onclick="document.getElementById('profile-overlay').classList.remove('open')">✕</button>
+    </div>
+
+    <div class="pm-body">
+      <div class="pm-field">
+        <label class="pm-label">Steam профиль URL</label>
+        <div class="pm-steam-row">
+          <input class="pm-input" id="pm-steam-url" type="text" placeholder="steamcommunity.com/id/...">
+          <button class="pm-steam-fetch" id="pm-fetch-btn" onclick="fetchSteamPreview()">ПРОВЕРИТЬ</button>
+        </div>
+      </div>
+      <div class="pm-row">
+        <div class="pm-field">
+          <label class="pm-label">Роль</label>
+          <select class="pm-select" id="pm-role">
+            <option value="raider">Raider</option>
+            <option value="builder">Builder / Electrician</option>
+            <option value="pvp">PVP / Coller</option>
+            <option value="farmer">Farmer / Support</option>
+            <option value="any">Any</option>
+          </select>
+        </div>
+        <div class="pm-field">
+          <label class="pm-label">Часов в Rust</label>
+          <input class="pm-input" id="pm-hours" type="number" min="0" placeholder="0">
+        </div>
+      </div>
+    </div>
+
+    <div class="pm-footer">
+      <button class="pm-save" id="pm-save-btn" onclick="saveProfile()">СОХРАНИТЬ</button>
+      <div class="pm-msg" id="pm-msg"></div>
+    </div>
+  </div>
+</div>
+
 <!-- FOOTER -->
 <footer>
   <div class="footer-logo">WF</div>
@@ -800,14 +994,25 @@ document.querySelectorAll('button,a').forEach(el=>{
 const wfToken    = localStorage.getItem('wf_token');
 const wfUsername = localStorage.getItem('wf_username');
 
+function getAvatarImgHtml(url, size, cls){
+  if(url){
+    return `<img src="${url}" class="${cls}" width="${size}" height="${size}" style="width:${size}px;height:${size}px;border-radius:50%;object-fit:cover;">`;
+  }
+  return `<div class="${cls.replace('pm-avatar','pm-avatar-placeholder')}" style="width:${size}px;height:${size}px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:${Math.round(size*.4)}px;color:rgba(155,48,255,.4);">◈</div>`;
+}
+
 function renderNavAuth(){
   const nav = document.getElementById('nav-auth');
   if(wfToken && wfUsername){
+    const avatarUrl = localStorage.getItem('wf_avatar') || '';
+    const avatarHtml = avatarUrl
+      ? `<img src="${avatarUrl}" style="width:24px;height:24px;border-radius:50%;border:1px solid rgba(155,48,255,.5);object-fit:cover;">`
+      : `<div style="width:24px;height:24px;border-radius:50%;border:1px solid rgba(155,48,255,.4);background:rgba(75,0,130,.3);display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--purple-neon);">◈</div>`;
     nav.innerHTML = `
-      <span style="font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;
-        color:var(--purple-bright);border:1px solid rgba(155,48,255,.35);padding:8px 16px;">
+      <a href="/profile/" class="profile-trigger">
+        ${avatarHtml}
         ▶ ${wfUsername.toUpperCase()}
-      </span>
+      </a>
       <button onclick="logout()" style="font-family:'Share Tech Mono',monospace;font-size:9px;
         letter-spacing:2px;color:var(--text-dim);background:none;border:1px solid rgba(155,48,255,.15);
         padding:8px 14px;cursor:none;transition:color .2s;"
@@ -825,7 +1030,122 @@ function renderNavAuth(){
 function logout(){
   localStorage.removeItem('wf_token');
   localStorage.removeItem('wf_username');
+  localStorage.removeItem('wf_avatar');
+  localStorage.removeItem('wf_steam_name');
   window.location.reload();
+}
+
+// ── PROFILE MODAL ───────────────────────────────────────
+async function openProfileModal(){
+  const overlay = document.getElementById('profile-overlay');
+  overlay.classList.add('open');
+  document.getElementById('pm-msg').textContent = '';
+  document.getElementById('pm-username').textContent = (wfUsername || '').toUpperCase();
+  document.getElementById('pm-steamname').textContent = localStorage.getItem('wf_steam_name') || '';
+  renderModalAvatar(localStorage.getItem('wf_avatar') || '');
+
+  // Загружаем свежий профиль с сервера
+  try {
+    const res  = await fetch('/api/auth/profile/', {
+      headers: {'Authorization': 'Token ' + wfToken}
+    });
+    const data = await res.json();
+    if(data.ok){
+      document.getElementById('pm-steam-url').value  = data.steam_url  || '';
+      document.getElementById('pm-role').value        = data.role       || 'any';
+      document.getElementById('pm-hours').value       = data.hours      || 0;
+      document.getElementById('pm-steamname').textContent = data.steam_name || '';
+      renderModalAvatar(data.avatar_url || '');
+      // Кешируем локально
+      if(data.avatar_url)   localStorage.setItem('wf_avatar',     data.avatar_url);
+      if(data.steam_name)   localStorage.setItem('wf_steam_name', data.steam_name);
+    }
+  } catch(e){}
+}
+
+function renderModalAvatar(url){
+  const wrap = document.getElementById('pm-avatar-wrap');
+  if(url){
+    wrap.innerHTML = `<img class="pm-avatar" src="${url}">
+      <div class="pm-steam-badge">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="rgba(155,48,255,.8)">
+          <path d="M12 0C5.4 0 0 5.4 0 12c0 5.2 3.3 9.7 8 11.4l3.7-8.6c-.7-.5-1.2-1.3-1.2-2.3 0-1.7 1.3-3 3-3 1.7 0 3 1.3 3 3s-1.3 3-3 3c-.1 0-.2 0-.3 0l-8.5 3.7C7.3 22 9.5 23 12 23c6.6 0 12-5.4 12-12S18.6 0 12 0z"/>
+        </svg>
+      </div>`;
+  } else {
+    wrap.innerHTML = `<div class="pm-avatar-placeholder">◈</div>`;
+  }
+}
+
+function closeProfileModal(e){
+  if(e.target === document.getElementById('profile-overlay')){
+    document.getElementById('profile-overlay').classList.remove('open');
+  }
+}
+
+async function fetchSteamPreview(){
+  const url = document.getElementById('pm-steam-url').value.trim();
+  if(!url) return;
+  const btn = document.getElementById('pm-fetch-btn');
+  const msg = document.getElementById('pm-msg');
+  btn.disabled = true;
+  btn.textContent = '...';
+  msg.className = 'pm-msg';
+  msg.textContent = '';
+  try {
+    const res  = await fetch('/api/auth/steam-lookup/?url=' + encodeURIComponent(url));
+    const data = await res.json();
+    if(data.ok){
+      document.getElementById('pm-steamname').textContent = data.steam_name;
+      msg.className = 'pm-msg ok';
+      msg.textContent = 'Найден: ' + data.steam_name;
+    } else {
+      msg.className = 'pm-msg err';
+      msg.textContent = data.error || 'Профиль не найден';
+    }
+  } catch(e){
+    msg.className = 'pm-msg err';
+    msg.textContent = 'Ошибка соединения';
+  }
+  btn.disabled = false;
+  btn.textContent = 'ПРОВЕРИТЬ';
+}
+
+async function saveProfile(){
+  const btn  = document.getElementById('pm-save-btn');
+  const msg  = document.getElementById('pm-msg');
+  btn.disabled = true;
+  msg.className = 'pm-msg';
+  msg.textContent = 'Сохранение...';
+  try {
+    const res = await fetch('/api/auth/profile/', {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Token ' + wfToken,
+      },
+      body: JSON.stringify({
+        steam_url: document.getElementById('pm-steam-url').value.trim(),
+        role:      document.getElementById('pm-role').value,
+        hours:     parseInt(document.getElementById('pm-hours').value) || 0,
+      }),
+    });
+    const data = await res.json();
+    if(data.ok){
+      msg.className = 'pm-msg ok';
+      msg.textContent = 'Сохранено!';
+      if(data.avatar_url)  { localStorage.setItem('wf_avatar',     data.avatar_url); renderModalAvatar(data.avatar_url); }
+      if(data.steam_name)  { localStorage.setItem('wf_steam_name', data.steam_name); document.getElementById('pm-steamname').textContent = data.steam_name; }
+      renderNavAuth(); // обновляем аватар в нав
+    } else {
+      msg.className = 'pm-msg err';
+      msg.textContent = data.error || 'Ошибка сохранения';
+    }
+  } catch(e){
+    msg.className = 'pm-msg err';
+    msg.textContent = 'Ошибка соединения';
+  }
+  btn.disabled = false;
 }
 
 // ── PAGE SWITCHING ─────────────────────────────────────
@@ -965,25 +1285,31 @@ async function loadVideos(){
   try {
     const res   = await fetch(API + '/api/videos/');
     const vids  = await res.json();
-    grid.innerHTML = vids.map((v, i) => `
-      <div class="vid-card reveal" data-cat="${v.category}" style="transition-delay:${(i*0.05+.05).toFixed(2)}s">
+    grid.innerHTML = vids.map((v, i) => {
+      const thumbContent = v.thumbnail_url
+        ? `<img src="${v.thumbnail_url}" alt="${v.title}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" loading="lazy" onerror="this.style.display='none'">`
+        : `<div class="vid-thumb-bg" style="background:${VID_COLORS[v.category]||VID_COLORS.raid};width:100%;height:100%;position:absolute;"></div>`;
+      const link = v.url ? `onclick="window.open('${v.url}','_blank')"` : '';
+      return `
+      <div class="vid-card reveal" data-cat="${v.category}" style="transition-delay:${(i*0.05+.05).toFixed(2)}s" ${link}>
         <div class="vid-thumb">
-          <div class="vid-thumb-bg" style="background:${VID_COLORS[v.category]||VID_COLORS.raid};width:100%;height:100%;position:absolute;"></div>
+          ${thumbContent}
           <div class="vid-overlay"></div>
           <div class="vid-play-btn">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="rgba(155,48,255,1)"><path d="M8 5v14l11-7z"/></svg>
           </div>
-          <div class="vid-duration">${v.duration}</div>
-          <div class="vid-views">▶ ${v.views}</div>
+          ${v.duration ? `<div class="vid-duration">${v.duration}</div>` : ''}
+          ${v.views ? `<div class="vid-views">▶ ${v.views}</div>` : ''}
         </div>
         <div class="vid-meta">
           <div class="vid-title">${v.title}</div>
           <div class="vid-info">
             <div class="vid-type">${v.category.toUpperCase()}</div>
-            <div class="vid-date">${v.date}</div>
+            <div class="vid-date">${v.date || '—'}</div>
           </div>
         </div>
-      </div>`).join('');
+      </div>`;
+    }).join('');
     triggerReveal();
   } catch(e){ grid.innerHTML = '<p style="color:var(--text-dim);padding:1rem">Ошибка загрузки видео</p>'; }
 }

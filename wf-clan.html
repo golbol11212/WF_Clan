@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>WF | Rust Clan</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet"></noscript>
 <style>
   :root {
     --void: #020005;
@@ -682,10 +683,15 @@
     clip-path: polygon(8px 0%,100% 0%,calc(100% - 8px) 100%,0% 100%);
   }
 
-  .role-badge.build   { background: rgba(0,180,120,0.1); border-color: rgba(0,220,150,0.3); color: #00dc96; }
-  .role-badge.electrik{ background: rgba(255,200,0,0.1); border-color: rgba(255,200,0,0.3); color: #ffc800; }
-  .role-badge.fermer  { background: rgba(0,180,255,0.1); border-color: rgba(0,180,255,0.3); color: #00b4ff; }
-  .role-badge.coller  { background: rgba(255,60,60,0.1); border-color: rgba(255,60,60,0.3); color: #ff4040; }
+  .role-badge.leader   { background: rgba(255,215,0,0.1);   border-color: rgba(255,215,0,0.35);   color: #ffd700; }
+  .role-badge.deputy   { background: rgba(192,192,192,0.1); border-color: rgba(192,192,192,0.3);  color: #c0c0c0; }
+  .role-badge.coller   { background: rgba(255,60,60,0.1);   border-color: rgba(255,60,60,0.3);    color: #ff4040; }
+  .role-badge.builder  { background: rgba(0,180,120,0.1);   border-color: rgba(0,220,150,0.3);    color: #00dc96; }
+  .role-badge.electric { background: rgba(255,200,0,0.1);   border-color: rgba(255,200,0,0.3);    color: #ffc800; }
+  .role-badge.farmer   { background: rgba(0,180,255,0.1);   border-color: rgba(0,180,255,0.3);    color: #00b4ff; }
+  .role-badge.combater { background: rgba(255,100,0,0.1);   border-color: rgba(255,100,0,0.3);    color: #ff6400; }
+  .role-badge.raider   { background: rgba(255,30,30,0.1);   border-color: rgba(255,30,30,0.3);    color: #ff2020; }
+  .role-badge.ferm     { background: rgba(140,200,50,0.1);  border-color: rgba(140,200,50,0.3);   color: #8cc832; }
 
   .requirements-list {
     list-style: none;
@@ -1221,64 +1227,122 @@
       <p>Мы не берём рандомов. Каждый кандидат проходит испытательный период. Слабость не терпится — только самые умелые и дисциплинированные игроки получают место в WF.</p>
 
       <div class="roles-tabs">
-        <button class="role-tab active" data-role="main">MAIN</button>
-        <button class="role-tab" data-role="build">BUILD</button>
-        <button class="role-tab" data-role="electrik">ELECTRIK</button>
-        <button class="role-tab" data-role="fermer">FERMER</button>
-        <button class="role-tab" data-role="coller">COLLER</button>
+        <button class="role-tab active" data-role="leader">👑 ЛИДЕР</button>
+        <button class="role-tab" data-role="deputy">🎖️ ЗАМ</button>
+        <button class="role-tab" data-role="coller">🎯 КОЛЕР</button>
+        <button class="role-tab" data-role="builder">🔧 БИЛДЕР</button>
+        <button class="role-tab" data-role="electric">⚡ ЭЛЕКТРИК</button>
+        <button class="role-tab" data-role="farmer">⛏️ ФАРМЕР</button>
+        <button class="role-tab" data-role="combater">🗡️ КОМБАТЕР</button>
+        <button class="role-tab" data-role="raider">💣 РЕЙДЕР</button>
+        <button class="role-tab" data-role="ferm">🌾 ФЕРМЕР</button>
       </div>
 
-      <div class="role-panel active" id="role-main">
-        <div class="role-badge">MAIN</div>
+      <div class="role-panel active" id="role-leader">
+        <div class="role-badge leader">👑 ЛИДЕР</div>
         <ul class="requirements-list">
-          <li>Возраст от 15+ лет (без исключений)</li>
-          <li>Кол-во часов от 4.000+</li>
-          <li>Минимальные знания механик игры</li>
-          <li>Умение слушать и слышать</li>
-          <li>Онлайн от 8+ часов в день</li>
-          <li>Умение играть в больших командах (20+)</li>
+          <li>10 000+ часов в Rust (один аккаунт)</li>
+          <li>Возраст 18+ лет</li>
+          <li>Опыт руководства кланом или группой 10+</li>
+          <li>Стратегическое мышление и тактика</li>
+          <li>Ответственность за каждого участника</li>
+          <li>Онлайн 10+ часов в день в вайп</li>
         </ul>
       </div>
 
-      <div class="role-panel" id="role-build">
-        <div class="role-badge build">BUILD</div>
+      <div class="role-panel" id="role-deputy">
+        <div class="role-badge deputy">🎖️ ЗАМ</div>
         <ul class="requirements-list">
-          <li>3000+ часов в Rust (один аккаунт)</li>
-          <li>Возраст 15+</li>
-          <li>8+ часов онлайн в день</li>
-          <li>Опыт строительства и клановых проектов</li>
-        </ul>
-      </div>
-
-      <div class="role-panel" id="role-electrik">
-        <div class="role-badge electrik">ELECTRIK</div>
-        <ul class="requirements-list">
-          <li>2500+ часов в Rust (один аккаунт)</li>
-          <li>Возраст 14+</li>
-          <li>6+ часов онлайн в день</li>
-          <li>Уметь делать ВСЁ в сфере электрики</li>
-        </ul>
-      </div>
-
-      <div class="role-panel" id="role-fermer">
-        <div class="role-badge fermer">FERMER</div>
-        <ul class="requirements-list">
-          <li>2000+ часов в Rust (один аккаунт)</li>
-          <li>Возраст 14+</li>
-          <li>5+ часов онлайн в день</li>
-          <li>Уметь выводить топовые гены YYYGGG</li>
+          <li>8 000+ часов в Rust (один аккаунт)</li>
+          <li>Возраст 17+ лет</li>
+          <li>Умение координировать группу 5+</li>
+          <li>Знание всех ролей клана изнутри</li>
+          <li>Дисциплина и авторитет</li>
+          <li>Онлайн 9+ часов в день в вайп</li>
         </ul>
       </div>
 
       <div class="role-panel" id="role-coller">
-        <div class="role-badge coller">COLLER</div>
+        <div class="role-badge coller">🎯 КОЛЕР</div>
         <ul class="requirements-list">
-          <li>7000+ часов в Rust (один аккаунт)</li>
+          <li>7 000+ часов в Rust (один аккаунт)</li>
           <li>Возраст 16+ лет</li>
           <li>8+ часов онлайн в день</li>
+          <li>Отличная стрельба и реакция</li>
           <li>Ответственность и дисциплина</li>
-          <li>Хорошая стрельба</li>
-          <li>Высокое понимание игры</li>
+          <li>Высокое понимание PVP механик</li>
+        </ul>
+      </div>
+
+      <div class="role-panel" id="role-builder">
+        <div class="role-badge builder">🔧 БИЛДЕР</div>
+        <ul class="requirements-list">
+          <li>3 000+ часов в Rust (один аккаунт)</li>
+          <li>Возраст 15+ лет</li>
+          <li>8+ часов онлайн в день</li>
+          <li>Опыт строительства клановых баз</li>
+          <li>Знание механик укреплений и ловушек</li>
+          <li>Умение строить под давлением онлайн-рейда</li>
+        </ul>
+      </div>
+
+      <div class="role-panel" id="role-electric">
+        <div class="role-badge electric">⚡ ЭЛЕКТРИК</div>
+        <ul class="requirements-list">
+          <li>2 500+ часов в Rust (один аккаунт)</li>
+          <li>Возраст 14+ лет</li>
+          <li>6+ часов онлайн в день</li>
+          <li>Знание ВСЕЙ системы электрики Rust</li>
+          <li>Умение строить авто-турели, двери и ловушки</li>
+          <li>Опыт защиты базы через электрику</li>
+        </ul>
+      </div>
+
+      <div class="role-panel" id="role-farmer">
+        <div class="role-badge farmer">⛏️ ФАРМЕР</div>
+        <ul class="requirements-list">
+          <li>2 000+ часов в Rust (один аккаунт)</li>
+          <li>Возраст 14+ лет</li>
+          <li>6+ часов онлайн в день</li>
+          <li>Умение быстро добывать ресурсы</li>
+          <li>Знание лучших точек фарма на карте</li>
+          <li>Слаженная работа со складом клана</li>
+        </ul>
+      </div>
+
+      <div class="role-panel" id="role-combater">
+        <div class="role-badge combater">🗡️ КОМБАТЕР</div>
+        <ul class="requirements-list">
+          <li>5 000+ часов в Rust (один аккаунт)</li>
+          <li>Возраст 15+ лет</li>
+          <li>8+ часов онлайн в день</li>
+          <li>Высокий K/D и боевой опыт</li>
+          <li>Участие в групповых сражениях 10v10+</li>
+          <li>Умение работать в команде под огнём</li>
+        </ul>
+      </div>
+
+      <div class="role-panel" id="role-raider">
+        <div class="role-badge raider">💣 РЕЙДЕР</div>
+        <ul class="requirements-list">
+          <li>6 000+ часов в Rust (один аккаунт)</li>
+          <li>Возраст 16+ лет</li>
+          <li>8+ часов онлайн в день</li>
+          <li>Опыт онлайн-рейдов и оффлайн-рейдов</li>
+          <li>Знание калькуляции C4, ракет и зарядов</li>
+          <li>Хладнокровие и скорость принятия решений</li>
+        </ul>
+      </div>
+
+      <div class="role-panel" id="role-ferm">
+        <div class="role-badge ferm">🌾 ФЕРМЕР</div>
+        <ul class="requirements-list">
+          <li>1 500+ часов в Rust (один аккаунт)</li>
+          <li>Возраст 14+ лет</li>
+          <li>5+ часов онлайн в день</li>
+          <li>Умение выводить топовые гены YYYGGG</li>
+          <li>Знание механик теплиц и еды</li>
+          <li>Снабжение клана едой и медикаментами</li>
         </ul>
       </div>
     </div>
@@ -1325,11 +1389,15 @@
           <label class="form-label">Primary Role</label>
           <select id="f-role" class="form-select">
             <option value="">SELECT_ROLE</option>
-            <option value="raider">RAIDER</option>
-            <option value="builder">BUILDER / ELECTRICIAN</option>
-            <option value="pvp">PVP / COLLER</option>
-            <option value="farmer">FARMER / SUPPORT</option>
-            <option value="any">ANY</option>
+            <option value="leader">ЛИДЕР</option>
+            <option value="deputy">ЗАМ</option>
+            <option value="coller">КОЛЕР</option>
+            <option value="builder">БИЛДЕР</option>
+            <option value="electric">ЭЛЕКТРИК</option>
+            <option value="farmer">ФАРМЕР</option>
+            <option value="combater">КОМБАТЕР</option>
+            <option value="raider">РЕЙДЕР</option>
+            <option value="ferm">ФЕРМЕР</option>
           </select>
         </div>
 
@@ -1561,14 +1629,26 @@
   }, 60);
 
 // ── AUTH NAV ─────────────────────────────────────────────
+function wfLogout(){
+  ['wf_token','wf_username','wf_avatar','wf_steam_name'].forEach(function(k){ localStorage.removeItem(k); });
+  location.reload();
+}
 (function(){
   const token    = localStorage.getItem('wf_token');
   const username = localStorage.getItem('wf_username');
   const el = document.getElementById('nav-auth');
   if(!el) return;
+  el.style.cssText = 'display:flex;align-items:center;gap:8px;';
   if(token && username){
-    el.innerHTML = `<span style="font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:2px;color:var(--purple-bright);border:1px solid rgba(155,48,255,.35);padding:10px 18px;">▶ ${username.toUpperCase()}</span>
-      <button onclick="localStorage.removeItem('wf_token');localStorage.removeItem('wf_username');location.reload();" style="font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:2px;color:var(--text-dim);background:none;border:1px solid rgba(155,48,255,.15);padding:10px 14px;cursor:pointer;transition:color .2s;" onmouseenter="this.style.color='#ff3355'" onmouseleave="this.style.color='var(--text-dim)'">ВЫЙТИ</button>`;
+    const av = localStorage.getItem('wf_avatar') || '';
+    const avHtml = av
+      ? '<img src="' + av + '" style="width:24px;height:24px;border-radius:50%;border:1px solid rgba(155,48,255,.5);object-fit:cover;display:block;">'
+      : '<span style="width:24px;height:24px;border-radius:50%;border:1px solid rgba(155,48,255,.4);background:rgba(75,0,130,.3);display:flex;align-items:center;justify-content:center;font-size:10px;color:#9b30ff;flex-shrink:0;">◈</span>';
+    el.innerHTML =
+      '<a href="/profile/" style="display:flex;align-items:center;gap:8px;font-family:\'Share Tech Mono\',monospace;font-size:11px;letter-spacing:2px;color:#bf5fff;text-decoration:none;padding:8px 14px;">'
+      + avHtml + ' ▶ ' + username.toUpperCase()
+      + '</a>'
+      + '<button onclick="wfLogout()" style="font-family:\'Share Tech Mono\',monospace;font-size:11px;letter-spacing:2px;color:#7a6d8a;background:none;border:1px solid rgba(155,48,255,.15);padding:8px 14px;cursor:pointer;transition:color .2s;" onmouseenter="this.style.color=\'#ff3355\'" onmouseleave="this.style.color=\'#7a6d8a\'">ВЫЙТИ</button>';
   } else {
     el.innerHTML = '<a href="/auth/" class="nav-login">ВОЙТИ</a>';
   }
