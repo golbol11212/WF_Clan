@@ -75,7 +75,8 @@ USE_I18N = True
 USE_TZ = True
 
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [BASE_DIR]
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_DIRS = [BASE_DIR / 'clan' / 'static'] if (BASE_DIR / 'clan' / 'static').exists() else []
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
